@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Beatles - Album Sorter</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta name="description"
+        content="Identify the Beatles album from a 4-second song snippet. Test your Fab Four knowledge!">
+</head>
+
+<body>
+    <div class="glass-container">
+        <header>
+            <h1>Beatles <span class="accent">Sorter</span></h1>
+            <div class="score-board">
+                <span id="score">Score: 0</span>
+                <span id="highscore">Highscore: 0</span>
+                <span id="round">Round: 1/10</span>
+            </div>
+        </header>
+
+        <main>
+            <section class="player-section">
+                <div class="audio-controls">
+                    <button id="play-btn" class="main-btn">
+                        <div class="play-icon"></div>
+                        <span id="play-btn-text">Play Snippet (4s)</span>
+                    </button>
+                    <div class="visualizer">
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                        <div class="bar"></div>
+                    </div>
+                </div>
+                <div id="feedback" class="feedback"></div>
+            </section>
+
+            <section class="album-grid" id="album-grid">
+                <!-- Album cards will be injected here -->
+            </section>
+        </main>
+
+        <footer>
+            <!-- Next button merged into play-btn -->
+        </footer>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+
+</html>
