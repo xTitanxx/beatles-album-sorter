@@ -1,16 +1,16 @@
 const albums = [
-    { name: "Please Please Me", year: 1963, img: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/9c/ff/b5/9cffb5a6-a37f-c84a-7240-0333a071bc92/00602567725275.rgb.jpg/600x600bb.jpg" },
-    { name: "With The Beatles", year: 1963, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/03/02/d2/0302d204-77c1-0c87-e03a-698bd31cf038/00602567725619.rgb.jpg/600x600bb.jpg" },
-    { name: "A Hard Day's Night", year: 1964, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/db/a2/7a/dba27a46-3685-508d-d32e-a0e73cc82251/00602567713296.rgb.jpg/600x600bb.jpg" },
-    { name: "Beatles for Sale", year: 1964, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/79/2c/10/792c1019-387f-e819-ac8f-bc989f20a970/00602567725190.rgb.jpg/600x600bb.jpg" },
-    { name: "Help!", year: 1965, img: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/1a/19/db/1a19db26-17ad-b986-11a9-f72ac7a6194b/18UMGIM31214.rgb.jpg/600x600bb.jpg" },
-    { name: "Rubber Soul", year: 1965, img: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/af/20/aa/af20aa89-4002-11fb-25d8-ff544af67eb4/00602567725404.rgb.jpg/600x600bb.jpg" },
-    { name: "Revolver", year: 1966, img: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/97/f4/3a/97f43ab4-9fdf-7a41-e430-7c6c313f3883/13UMGIM63887.rgb.jpg/600x600bb.jpg" },
-    { name: "Sgt. Pepper's", year: 1967, img: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/64/85/d2/6485d219-91ac-5481-2668-7eab1320436d/21UMGIM57007.rgb.jpg/600x600bb.jpg" },
-    { name: "Magical Mystery Tour", year: 1967, img: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/43/0e/37/430e3790-75d5-c96a-1380-f9d9803aa700/18UMGIM31245.rgb.jpg/600x600bb.jpg" },
-    { name: "The Beatles (White Album)", year: 1968, img: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/fa/5b/89/fa5b898d-bad6-e053-4195-260e5c74f2bb/00602567725466.rgb.jpg/600x600bb.jpg" },
-    { name: "Abbey Road", year: 1969, img: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/48/53/43/485343e3-dd6a-0034-faec-f4b6403f8108/13UMGIM63890.rgb.jpg/600x600bb.jpg" },
-    { name: "Let It Be", year: 1970, img: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5f/ff/9a/5fff9a6a-bb13-6507-5e68-2793ef798834/21UMGIM61121.rgb.jpg/600x600bb.jpg" }
+    { name: "Please Please Me", exactName: "Please Please Me", year: 1963, img: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/9c/ff/b5/9cffb5a6-a37f-c84a-7240-0333a071bc92/00602567725275.rgb.jpg/600x600bb.jpg" },
+    { name: "With The Beatles", exactName: "With The Beatles", year: 1963, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/03/02/d2/0302d204-77c1-0c87-e03a-698bd31cf038/00602567725619.rgb.jpg/600x600bb.jpg" },
+    { name: "A Hard Day's Night", exactName: "A Hard Day's Night", year: 1964, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/db/a2/7a/dba27a46-3685-508d-d32e-a0e73cc82251/00602567713296.rgb.jpg/600x600bb.jpg" },
+    { name: "Beatles for Sale", exactName: "Beatles for Sale", year: 1964, img: "https://is1-ssl.mzstatic.com/image/thumb/Music124/v4/79/2c/10/792c1019-387f-e819-ac8f-bc989f20a970/00602567725190.rgb.jpg/600x600bb.jpg" },
+    { name: "Help!", exactName: "Help!", year: 1965, img: "https://is1-ssl.mzstatic.com/image/thumb/Music122/v4/1a/19/db/1a19db26-17ad-b986-11a9-f72ac7a6194b/18UMGIM31214.rgb.jpg/600x600bb.jpg" },
+    { name: "Rubber Soul", exactName: "Rubber Soul", year: 1965, img: "https://is1-ssl.mzstatic.com/image/thumb/Music114/v4/af/20/aa/af20aa89-4002-11fb-25d8-ff544af67eb4/00602567725404.rgb.jpg/600x600bb.jpg" },
+    { name: "Revolver", exactName: "Revolver", year: 1966, img: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/97/f4/3a/97f43ab4-9fdf-7a41-e430-7c6c313f3883/13UMGIM63887.rgb.jpg/600x600bb.jpg" },
+    { name: "Sgt. Pepper's", exactName: "Sgt. Pepper's Lonely Hearts Club Band", year: 1967, img: "https://is1-ssl.mzstatic.com/image/thumb/Music125/v4/64/85/d2/6485d219-91ac-5481-2668-7eab1320436d/21UMGIM57007.rgb.jpg/600x600bb.jpg" },
+    { name: "Magical Mystery Tour", exactName: "Magical Mystery Tour", year: 1967, img: "https://is1-ssl.mzstatic.com/image/thumb/Music126/v4/43/0e/37/430e3790-75d5-c96a-1380-f9d9803aa700/18UMGIM31245.rgb.jpg/600x600bb.jpg" },
+    { name: "The Beatles (White Album)", exactName: "The Beatles", year: 1968, img: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/fa/5b/89/fa5b898d-bad6-e053-4195-260e5c74f2bb/00602567725466.rgb.jpg/600x600bb.jpg" },
+    { name: "Abbey Road", exactName: "Abbey Road", year: 1969, img: "https://is1-ssl.mzstatic.com/image/thumb/Music211/v4/48/53/43/485343e3-dd6a-0034-faec-f4b6403f8108/13UMGIM63890.rgb.jpg/600x600bb.jpg" },
+    { name: "Let It Be", exactName: "Let It Be", year: 1970, img: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5f/ff/9a/5fff9a6a-bb13-6507-5e68-2793ef798834/21UMGIM61121.rgb.jpg/600x600bb.jpg" }
 ];
 
 let roundAlbums = []; // Shuffled queue for the session
@@ -87,12 +87,19 @@ async function fetchNewSong(autoPlay = false) {
 
         // Pick the next album from our balanced queue
         const targetAlbum = roundAlbums[round - 1];
-        const query = encodeURIComponent(`the beatles ${targetAlbum.name}`);
+
+        // Search term using the exact official name
+        const query = encodeURIComponent(`the beatles ${targetAlbum.exactName}`);
         const response = await fetch(`https://itunes.apple.com/search?term=${query}&entity=song&limit=50`);
         const data = await response.json();
 
+        // Regex strictly matches exact album name, plus optional space and parentheses or brackets (e.g. " (Remastered)")
+        // This prevents "The Beatles" from matching "The Beatles 1967-1970" or "The Beatles 1"
+        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const targetRegex = new RegExp('^' + escapeRegExp(targetAlbum.exactName) + '(?: \\(.*\\)| \\[.*\\])?$', 'i');
+
         const validSongs = data.results.filter(song => {
-            const isTargetAlbum = song.collectionName.toLowerCase().includes(targetAlbum.name.toLowerCase().replace(" (White Album)", ""));
+            const isTargetAlbum = targetRegex.test(song.collectionName);
             const isPlayed = playedSongs.has(song.trackId);
             return isTargetAlbum && !isPlayed;
         });
