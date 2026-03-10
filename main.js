@@ -13,10 +13,19 @@ const albums = [
     { name: "Let It Be", exactName: "Let It Be", year: 1970, img: "https://is1-ssl.mzstatic.com/image/thumb/Music115/v4/5f/ff/9a/5fff9a6a-bb13-6507-5e68-2793ef798834/21UMGIM61121.rgb.jpg/600x600bb.jpg" }
 ];
 
+const authors = [
+    { name: "John Lennon", id: "John", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/John_Lennon_1969_%28cropped%29.jpg/600px-John_Lennon_1969_%28cropped%29.jpg" },
+    { name: "Paul McCartney", id: "Paul", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Paul_McCartney_in_October_2018.jpg/600px-Paul_McCartney_in_October_2018.jpg" },
+    { name: "George Harrison", id: "George", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/George_Harrison_1974.jpg/600px-George_Harrison_1974.jpg" },
+    { name: "Ringo Starr", id: "Ringo", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Ringo_Starr_in_2014.jpg/600px-Ringo_Starr_in_2014.jpg" },
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/The_Beatles_arrive_in_New_York_City_-_1964_01.jpg/600px-The_Beatles_arrive_in_New_York_City_-_1964_01.jpg" }
+];
+
+let currentMode = 'album'; // 'album' or 'writer'
 let roundAlbums = []; // Shuffled queue for the session
 let currentSong = null;
 let score = 0;
-let highscore = sessionStorage.getItem('beatles_highscore') || 0;
+let highscore = sessionStorage.getItem('beatles_highscore_album') || 0;
 let round = 1;
 const maxRounds = 10;
 let audio = new Audio();
@@ -27,6 +36,7 @@ let playedSongs = new Set();
 let runHistory = [];
 
 const albumGrid = document.getElementById('album-grid');
+const authorGrid = document.getElementById('author-grid');
 const playBtn = document.getElementById('play-btn');
 const playBtnText = document.getElementById('play-btn-text');
 const feedbackEl = document.getElementById('feedback');
@@ -34,16 +44,65 @@ const scoreEl = document.getElementById('score');
 const highscoreEl = document.getElementById('highscore');
 const roundEl = document.getElementById('round');
 const visualizer = document.querySelector('.visualizer');
+const modeBtns = document.querySelectorAll('.mode-btn');
 
 function init() {
     renderAlbums();
+    renderAuthors();
+    setupModeToggle();
+    resetGame(currentMode);
+}
+
+function setupModeToggle() {
+    modeBtns.forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            if (e.target.classList.contains('active')) return;
+            
+            modeBtns.forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            
+            const newMode = e.target.id === 'mode-album' ? 'album' : 'writer';
+            resetGame(newMode);
+        });
+    });
+}
+
+function resetGame(mode) {
+    currentMode = mode;
+    score = 0;
+    round = 1;
+    playedSongs.clear();
+    runHistory = [];
+    isAnswered = false;
+    audio.pause();
+    clearTimeout(audioTimeout);
+    visualizer.classList.remove('visualizing');
+    
+    highscore = sessionStorage.getItem(`beatles_highscore_${mode}`) || 0;
     highscoreEl.textContent = `Highscore: ${highscore}`;
+    scoreEl.textContent = `Score: ${score}`;
+    roundEl.textContent = `Round: ${round}/${maxRounds}`;
+    
+    document.querySelector('.rundown-container')?.remove();
+    document.querySelector('.main-btn[onclick]')?.remove();
 
-    // Create a balanced shuffled queue for the session (10 random unique albums)
+    if (mode === 'album') {
+        albumGrid.classList.remove('hidden');
+        authorGrid.classList.add('hidden');
+        playBtn.classList.remove('hidden');
+    } else {
+        albumGrid.classList.add('hidden');
+        authorGrid.classList.remove('hidden');
+        playBtn.classList.remove('hidden');
+    }
+
     roundAlbums = [...albums].sort(() => Math.random() - 0.5).slice(0, 10);
-
-    fetchNewSong();
+    
+    // Re-bind play button to ensure clean slate
+    playBtn.removeEventListener('click', handlePlayClick);
     playBtn.addEventListener('click', handlePlayClick);
+    
+    fetchNewSong();
 }
 
 function handlePlayClick() {
@@ -55,12 +114,60 @@ function handlePlayClick() {
 }
 
 function getCredits(songName) {
-    const harrisonSongs = ["Something", "Here Comes the Sun", "While My Guitar Gently Weeps", "Taxman", "Within You Without You", "If I Needed Someone", "Old Brown Shoe", "Piggies", "Savoy Truffle", "Long, Long, Long", "I Me Mine", "For You Blue", "Think For Yourself", "The Inner Light", "I Want to Tell You", "Love You To"];
-    const starkeySongs = ["Octopus's Garden", "Don't Pass Me By"];
+    const title = songName.toLowerCase();
+    
+    // George and Ringo
+    const harrisonSongs = ["something", "here comes the sun", "while my guitar gently weeps", "taxman", "within you without you", "if i needed someone", "old brown shoe", "piggies", "savoy truffle", "long, long, long", "i me mine", "for you blue", "think for yourself", "the inner light", "i want to tell you", "love you to", "blue jay way", "don't bother me"];
+    const starkeySongs = ["octopus's garden", "don't pass me by"];
+    
+    if (harrisonSongs.some(s => title.includes(s))) return "George";
+    if (starkeySongs.some(s => title.includes(s))) return "Ringo";
 
-    if (harrisonSongs.some(s => songName.toLowerCase().includes(s.toLowerCase()))) return "George Harrison";
-    if (starkeySongs.some(s => songName.toLowerCase().includes(s.toLowerCase()))) return "Richard Starkey";
-    return "Lennon/McCartney";
+    // Primary John Lennon
+    const lennonSongs = ["help!", "ticket to ride", "in my life", "norwegian wood", "strawberry fields forever", "i am the walrus", "all you need is love", "lucy in the sky with diamonds", "a hard day's night", "revolution", "come together", "don't let me down", "julia", "dear prudence", "happiness is a warm gun", "across the universe", "nowhere man", "girl", "i feel fine", "day tripper", "ticket to ride", "please please me", "you're going to lose that girl", "hide your love away", "run for your life", "rain", "she said she said", "and your bird can sing", "doctor robert", "i'm only sleeping", "good morning good morning", "mr. kite", "glass onion", "bungalow bill", "sexy sadie", "cry baby cry", "yer blues", "everybody's got something to hide"];
+    
+    if (lennonSongs.some(s => title.includes(s))) return "John";
+
+    // Primary Paul McCartney
+    const mccartneySongs = ["yesterday", "hey jude", "let it be", "eleanor rigby", "penny lane", "blackbird", "here, there and everywhere", "ob-la-di", "get back", "hello, goodbye", "the long and winding road", "paperback writer", "michelle", "i saw her standing there", "can't buy me love", "all my loving", "drive my car", "got to get you into my life", "good day sunshine", "for no one", "fixing a hole", "getting better", "she's leaving home", "when i'm sixty-four", "lovely rita", "back in the u.s.s.r.", "martha my dear", "i will", "mother nature's son", "helter skelter", "honey pie", "lady madonna", "oh! darling", "maxwell's silver hammer", "you never give me your money", "golden slumbers"];
+
+    if (mccartneySongs.some(s => title.includes(s))) return "Paul";
+
+    // True collaborations or extremely ambiguous
+    const coWritten = ["a day in the life", "i want to hold your hand", "she loves you", "eight days a week", "we can work it out", "baby you're a rich man", "i've got a feeling", "with a little help from my friends"];
+    
+    if (coWritten.some(s => title.includes(s))) return "Lennon-McCartney";
+
+    // Default fallback to the official historical credit block if not explicitly mapped above
+    return "Lennon-McCartney";
+}
+
+function renderAlbums() {
+    albumGrid.innerHTML = '';
+    albums.forEach(album => {
+        const card = document.createElement('div');
+        card.className = 'card album-card';
+        card.innerHTML = `
+            <img src="${album.img}" alt="${album.name}">
+            <div class="card-name">${album.name}</div>
+        `;
+        card.addEventListener('click', () => checkAnswer(album, card));
+        albumGrid.appendChild(card);
+    });
+}
+
+function renderAuthors() {
+    authorGrid.innerHTML = '';
+    authors.forEach(author => {
+        const card = document.createElement('div');
+        card.className = 'card author-card';
+        card.innerHTML = `
+            <img src="${author.img}" alt="${author.name}">
+            <div class="card-name">${author.name}</div>
+        `;
+        card.addEventListener('click', () => checkAnswer(author, card));
+        authorGrid.appendChild(card);
+    });
 }
 
 function renderAlbums() {
@@ -151,7 +258,7 @@ function playSnippet() {
     }
 }
 
-function checkAnswer(album, card) {
+function checkAnswer(selection, card) {
     if (isAnswered) return;
 
     isAnswered = true;
@@ -160,7 +267,16 @@ function checkAnswer(album, card) {
     audio.pause();
     visualizer.classList.remove('visualizing');
 
-    const isCorrect = album.name === currentSong.correctAlbum.name;
+    let isCorrect = false;
+    let correctAnswerStr = "";
+    
+    if (currentMode === 'album') {
+        isCorrect = selection.name === currentSong.correctAlbum.name;
+        correctAnswerStr = currentSong.correctAlbum.name;
+    } else {
+        isCorrect = selection.id === currentSong.credits;
+        correctAnswerStr = currentSong.credits;
+    }
 
     // Store history
     runHistory.push({
@@ -179,14 +295,26 @@ function checkAnswer(album, card) {
         feedbackEl.style.color = "var(--success)";
     } else {
         card.classList.add('wrong');
-        feedbackEl.textContent = `Wrong! That was ${currentSong.trackName} from ${currentSong.correctAlbum.name}`;
+        const correctText = currentMode === 'album' 
+            ? `Wrong! That was ${currentSong.trackName} from ${currentSong.correctAlbum.name}`
+            : `Wrong! That was written by ${currentSong.credits}`;
+        feedbackEl.textContent = correctText;
         feedbackEl.style.color = "var(--error)";
 
-        // Highlight correct album
-        const cards = document.querySelectorAll('.album-card');
+        // Highlight correct card
+        const grid = currentMode === 'album' ? albumGrid : authorGrid;
+        const cards = grid.querySelectorAll('.card');
         cards.forEach(c => {
-            if (c.querySelector('.album-name').textContent === currentSong.correctAlbum.name) {
+            const nameEl = c.querySelector('.card-name').textContent;
+            // For authors, we want to match the ID which might be "Paul" while name is "Paul McCartney"
+            // Since our logic binds the original object, we just look up by text content
+            if (currentMode === 'album' && nameEl === currentSong.correctAlbum.name) {
                 c.classList.add('correct');
+            } else if (currentMode === 'writer') {
+                const targetAuthor = authors.find(a => a.id === currentSong.credits);
+                if (targetAuthor && nameEl === targetAuthor.name) {
+                    c.classList.add('correct');
+                }
             }
         });
     }
@@ -206,8 +334,7 @@ function nextRound(autoPlay = false) {
     if (round < maxRounds) {
         round++;
         roundEl.textContent = `Round: ${round}/${maxRounds}`;
-        const cards = document.querySelectorAll('.album-card');
-        cards.forEach(c => {
+        document.querySelectorAll('.card').forEach(c => {
             c.classList.remove('correct', 'wrong');
         });
         fetchNewSong(autoPlay);
@@ -219,11 +346,13 @@ function nextRound(autoPlay = false) {
 function showFinalResults() {
     if (score > highscore) {
         highscore = score;
-        sessionStorage.setItem('beatles_highscore', highscore);
+        sessionStorage.setItem(`beatles_highscore_${currentMode}`, highscore);
         highscoreEl.textContent = `Highscore: ${highscore}`;
     }
 
     albumGrid.classList.add('hidden');
+    authorGrid.classList.add('hidden');
+    document.querySelector('.mode-selector').classList.add('hidden');
     playBtn.classList.add('hidden');
     visualizer.classList.add('hidden'); // Hide visualizer dots
     feedbackEl.innerHTML = `Game Over!<br>Final Score: ${score}/${maxRounds}`;

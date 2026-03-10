@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Beatles - Album Sorter</title>
+    <title>The Beatles - Game Hub</title>
     <link rel="stylesheet" href="style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,35 +16,38 @@
 <body>
     <div class="glass-container">
         <header>
-            <h1>Beatles <span class="accent">Sorter</span></h1>
+            <h1>The <span class="accent">Beatles</span></h1>
             <div class="score-board">
-                <span id="score">Score: 0</span>
                 <span id="highscore">Highscore: 0</span>
+                <span id="score">Score: 0</span>
                 <span id="round">Round: 1/10</span>
             </div>
         </header>
 
         <main>
-            <section class="player-section">
-                <div class="audio-controls">
-                    <button id="play-btn" class="main-btn">
-                        <div class="play-icon"></div>
-                        <span id="play-btn-text">Play Snippet (4s)</span>
-                    </button>
-                    <div class="visualizer">
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                    </div>
-                </div>
-                <div id="feedback" class="feedback"></div>
-            </section>
+            <div class="mode-selector">
+                <button id="mode-album" class="mode-btn active">Album Sorter</button>
+                <button id="mode-writer" class="mode-btn">Who Wrote It?</button>
+            </div>
 
-            <section class="album-grid" id="album-grid">
-                <!-- Album cards will be injected here -->
-            </section>
+            <div class="audio-controls">
+                <div class="visualizer">
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                    <div class="bar"></div>
+                </div>
+                <button id="play-btn" class="main-btn">
+                    <div class="play-icon"></div>
+                    <span id="play-btn-text">Play Snippet (4s)</span>
+                </button>
+            </div>
+
+            <div id="feedback" class="feedback"></div>
+
+            <div id="album-grid" class="grid-container album-grid"></div>
+            <div id="author-grid" class="grid-container author-grid hidden"></div>
         </main>
 
         <footer>
