@@ -14,11 +14,11 @@ const albums = [
 ];
 
 const authors = [
-    { name: "John Lennon", id: "John", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/85/John_Lennon_1969_%28cropped%29.jpg/600px-John_Lennon_1969_%28cropped%29.jpg" },
-    { name: "Paul McCartney", id: "Paul", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/Paul_McCartney_in_October_2018.jpg/600px-Paul_McCartney_in_October_2018.jpg" },
-    { name: "George Harrison", id: "George", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/George_Harrison_1974.jpg/600px-George_Harrison_1974.jpg" },
-    { name: "Ringo Starr", id: "Ringo", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Ringo_Starr_in_2014.jpg/600px-Ringo_Starr_in_2014.jpg" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/The_Beatles_arrive_in_New_York_City_-_1964_01.jpg/600px-The_Beatles_arrive_in_New_York_City_-_1964_01.jpg" }
+    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "0%" },
+    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "33.33%" },
+    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "66.66%" },
+    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "100%" },
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/The_Beatles_in_America.JPG/600px-The_Beatles_in_America.JPG" }
 ];
 
 let currentMode = 'album'; // 'album' or 'writer'
@@ -162,7 +162,10 @@ function renderAuthors() {
         const card = document.createElement('div');
         card.className = 'card author-card';
         card.innerHTML = `
-            <img src="${author.img}" alt="${author.name}">
+            ${author.bgImg ? 
+                `<div class="author-img" style="background-image: url('${author.bgImg}'); background-position-x: ${author.bgX};"></div>` : 
+                `<img src="${author.img}" alt="${author.name}" class="author-img">`
+            }
             <div class="card-name">${author.name}</div>
         `;
         card.addEventListener('click', () => checkAnswer(author, card));

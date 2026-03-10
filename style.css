@@ -349,17 +349,20 @@ h1 {
     align-items: center;
 }
 
-.author-card img {
+.author-img {
     width: 120px;
     height: 120px;
-    object-fit: cover;
     border-radius: 50%;
     margin-bottom: 0.75rem;
     border: 2px solid transparent;
     transition: border-color 0.3s ease;
+    background-size: 400% auto;
+    background-position-y: center;
+    background-repeat: no-repeat;
+    object-fit: cover; /* Fallback for L/M image */
 }
 
-.author-card:hover img {
+.author-card:hover .author-img {
     border-color: var(--accent-color);
 }
 
