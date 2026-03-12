@@ -70,6 +70,12 @@ function init() {
         }
     });
 
+    audio.onended = () => {
+        if (gameState === 'playing') {
+            stopAudioSnippet();
+        }
+    };
+
     switchMode('album');
 }
 
@@ -97,7 +103,7 @@ function switchMode(mode) {
     feedbackEl.classList.remove('show', 'results');
     feedbackEl.textContent = '';
     document.querySelectorAll('.rundown-container').forEach(el => el.remove());
-    document.querySelectorAll('.mode-selector + .main-btn').forEach(el => el.remove());
+    document.querySelectorAll('.restart-btn').forEach(el => el.remove());
     
     document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
     document.getElementById(`mode-${mode}`).classList.add('active');
@@ -107,7 +113,7 @@ function switchMode(mode) {
     
     const highscoreKey = mode === 'timeline' ? `beatles_highscore_timeline` : `beatles_highscore_${mode}`;
     highscore = parseInt(sessionStorage.getItem(highscoreKey)) || 0;
-    highscoreEl.textContent = `Highscore: ${highscore}`;
+    highscoreEl.textContent = `High: ${highscore}`;
 
     if (mode === 'timeline') {
         initTimeline();
@@ -119,6 +125,7 @@ function switchMode(mode) {
         } else {
             authorGrid.classList.remove('hidden');
         }
+        roundEl.textContent = `${round}/${maxRounds}`;
         fetchNewSong(false);
     }
 }
@@ -136,7 +143,7 @@ async function fetchNewSong(autoPlay = false) {
         gameState = 'waiting';
         isAnswered = false;
         feedbackEl.classList.remove('show');
-        playBtnText.textContent = "Play Snippet";
+        playBtnText.textContent = "Play";
         playBtn.disabled = true;
 
         playBtn.querySelector('.material-symbols-outlined').textContent = "play_arrow";
@@ -200,14 +207,19 @@ function playSnippet() {
         playBtn.disabled = true;
 
         audioTimeout = setTimeout(() => {
-            audio.pause();
-            visualizer.classList.remove('visualizing');
-            visualizer.classList.add('hidden');
-            btnContent.classList.remove('hidden');
-            playBtn.disabled = false;
-            if (gameState === 'playing') gameState = 'waiting';
+            stopAudioSnippet();
         }, 4000);
     }
+}
+
+function stopAudioSnippet() {
+    clearTimeout(audioTimeout);
+    audio.pause();
+    visualizer.classList.remove('visualizing');
+    visualizer.classList.add('hidden');
+    document.getElementById('play-btn-content').classList.remove('hidden');
+    playBtn.disabled = false;
+    if (gameState === 'playing') gameState = 'waiting';
 }
 
 function checkAnswer(selection, card) {
@@ -215,11 +227,7 @@ function checkAnswer(selection, card) {
 
     isAnswered = true;
     gameState = 'answered';
-    clearTimeout(audioTimeout);
-    audio.pause();
-    visualizer.classList.remove('visualizing');
-    visualizer.classList.add('hidden');
-    document.getElementById('play-btn-content').classList.remove('hidden');
+    stopAudioSnippet();
 
     let isCorrect = false;
     if (currentMode === 'album') {
@@ -270,10 +278,10 @@ function checkAnswer(selection, card) {
 
     if (round === maxRounds) {
         playBtn.querySelector('.material-symbols-outlined').textContent = "military_tech";
-        playBtnText.textContent = "See Final Results";
+        playBtnText.textContent = "Results";
     } else {
         playBtn.querySelector('.material-symbols-outlined').textContent = "skip_next";
-        playBtnText.textContent = "Play Next Song";
+        playBtnText.textContent = "Next";
     }
     playBtn.disabled = false;
 }
@@ -281,7 +289,7 @@ function checkAnswer(selection, card) {
 function nextRound(autoPlay = false) {
     if (round < maxRounds) {
         round++;
-        roundEl.textContent = `Round: ${round}/${maxRounds}`;
+        roundEl.textContent = `${round}/${maxRounds}`;
         document.querySelectorAll('.card').forEach(c => {
             c.classList.remove('correct', 'wrong');
         });
@@ -296,14 +304,14 @@ function showFinalResults() {
     if (score > highscore) {
         highscore = score;
         sessionStorage.setItem(highscoreKey, highscore);
-        highscoreEl.textContent = `Highscore: ${highscore}`;
+        highscoreEl.textContent = `High: ${highscore}`;
     }
 
     albumGrid.classList.add('hidden');
     authorGrid.classList.add('hidden');
     playBtn.classList.add('hidden');
     visualizer.classList.add('hidden');
-    feedbackEl.innerHTML = `Game Over!<br>Final Score: ${score}/${maxRounds}`;
+    feedbackEl.innerHTML = `Final Score: ${score}/${maxRounds}`;
     feedbackEl.classList.add('results', 'show');
     feedbackEl.style.color = score >= 8 ? "var(--accent-color)" : "var(--text-primary)";
 
@@ -330,9 +338,9 @@ function showFinalResults() {
     document.querySelector('main').appendChild(rundownContainer);
 
     const restartBtn = document.createElement('button');
-    restartBtn.className = 'main-btn';
+    restartBtn.className = 'main-btn restart-btn';
     restartBtn.style.display = "flex";
-    restartBtn.innerHTML = '<span class="material-symbols-outlined">replay</span><span>Play Again</span>';
+    restartBtn.innerHTML = '<span class="material-symbols-outlined">replay</span><span>Replay</span>';
     restartBtn.style.margin = "2rem auto";
     restartBtn.onclick = () => switchMode(currentMode);
     document.querySelector('main').appendChild(restartBtn);
@@ -344,7 +352,8 @@ function initTimeline() {
     timelineSlots.innerHTML = '';
     userTimeline = Array(10).fill(null);
     submitTimelineBtn.classList.add('hidden');
-    submitTimelineBtn.textContent = "Finish & Check Order";
+    submitTimelineBtn.textContent = "Check Order";
+    submitTimelineBtn.classList.remove('restart-btn');
     selectedEventEl = null;
 
     const yearMap = new Map();
@@ -366,8 +375,8 @@ function initTimeline() {
         item.dataset.idx = idx;
         item.id = `event-${idx}`;
         
-        item.addEventListener('click', () => {
-            if (gameState === 'answered') return;
+        item.addEventListener('click', (e) => {
+            if (gameState === 'answered' || e.target.classList.contains('event-nav')) return;
             if (selectedEventEl) selectedEventEl.classList.remove('selected');
             selectedEventEl = item;
             item.classList.add('selected');
@@ -381,18 +390,27 @@ function initTimeline() {
         slot.className = 'timeline-slot';
         slot.dataset.slotIdx = i;
         
-        slot.addEventListener('click', () => {
-            if (gameState === 'answered') return;
+        slot.addEventListener('click', (e) => {
+            if (gameState === 'answered' || e.target.classList.contains('event-nav')) return;
             if (selectedEventEl && slot.children.length === 0) {
                 slot.appendChild(selectedEventEl);
                 selectedEventEl.classList.remove('selected');
-                userTimeline[i] = timelineEvents[parseInt(selectedEventEl.dataset.idx)];
+                const evIdx = parseInt(selectedEventEl.dataset.idx);
+                userTimeline[i] = timelineEvents[evIdx];
+                
+                // Add nav buttons
+                addNavButtons(selectedEventEl, i);
+                
                 selectedEventEl = null;
                 checkPoolEmpty();
             } else if (slot.children.length > 0) {
-                const item = slot.firstChild;
+                const item = slot.querySelector('.timeline-event');
                 eventPool.appendChild(item);
+                // Remove nav buttons when back in pool
+                const navs = item.querySelectorAll('.event-nav');
+                navs.forEach(n => n.remove());
                 userTimeline[i] = null;
+                if (eventPool.children.length > 0) eventPool.classList.remove('collapsed');
                 checkPoolEmpty();
             }
         });
@@ -401,9 +419,63 @@ function initTimeline() {
     }
 }
 
+function addNavButtons(el, slotIdx) {
+    const leftBtn = document.createElement('button');
+    leftBtn.className = 'event-nav nav-left material-symbols-outlined';
+    leftBtn.textContent = 'chevron_left';
+    leftBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, -1); };
+    
+    const rightBtn = document.createElement('button');
+    rightBtn.className = 'event-nav nav-right material-symbols-outlined';
+    rightBtn.textContent = 'chevron_right';
+    rightBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, 1); };
+    
+    el.appendChild(leftBtn);
+    el.appendChild(rightBtn);
+}
+
+function moveEvent(fromIdx, direction) {
+    const toIdx = fromIdx + direction;
+    if (toIdx < 0 || toIdx >= 10 || gameState === 'answered') return;
+    
+    const fromSlot = timelineSlots.children[fromIdx];
+    const toSlot = timelineSlots.children[toIdx];
+    
+    // Swap userTimeline data
+    const temp = userTimeline[fromIdx];
+    userTimeline[fromIdx] = userTimeline[toIdx];
+    userTimeline[toIdx] = temp;
+    
+    // Swap DOM elements
+    const fromEl = fromSlot.querySelector('.timeline-event');
+    const toEl = toSlot.querySelector('.timeline-event');
+    
+    if (fromEl) fromSlot.innerHTML = '';
+    if (toEl) toSlot.innerHTML = '';
+    
+    if (fromEl) {
+        toSlot.appendChild(fromEl);
+        addNavButtons(fromEl, toIdx);
+    }
+    if (toEl) {
+        fromSlot.appendChild(toEl);
+        addNavButtons(toEl, fromIdx);
+    }
+    
+    // Re-attach nav buttons is handled by fresh addNavButtons calls
+    // But we need to clear old ones first
+    if (fromEl) fromEl.querySelectorAll('.event-nav').forEach(n => n.remove());
+    if (toEl) toEl.querySelectorAll('.event-nav').forEach(n => n.remove());
+    if (fromEl) addNavButtons(fromEl, toIdx);
+    if (toEl) addNavButtons(toEl, fromIdx);
+}
+
 function checkPoolEmpty() {
     if (eventPool.children.length === 0) {
         submitTimelineBtn.classList.remove('hidden');
+        eventPool.classList.add('collapsed');
+    } else {
+        eventPool.classList.remove('collapsed');
     }
 }
 
@@ -412,21 +484,41 @@ function checkTimeline() {
     let timelineScore = 0;
     const slots = timelineSlots.querySelectorAll('.timeline-slot');
     
+    // Create a rundown similar to album results
+    const rundownHistory = [];
+    
+    // Sort the actual chosen events to know the perfect chronological order for comparison
+    const sortedEvents = [...userTimeline].sort((a, b) => a.year - b.year);
+
     slots.forEach((slot, i) => {
         const eventItem = slot.querySelector('.timeline-event');
         const userEvent = userTimeline[i];
         
+        // Remove nav buttons in result view
+        eventItem.querySelectorAll('.event-nav').forEach(n => n.remove());
+
         const yearTag = document.createElement('div');
         yearTag.className = 'year-label';
         yearTag.textContent = userEvent.year;
         slot.appendChild(yearTag);
 
-        if (i === 0 || userEvent.year > userTimeline[i-1].year) {
+        // Logic: Is it in the correct relative position? 
+        // We check if it's strictly greater than the previous one
+        const isChronological = (i === 0 || userEvent.year >= userTimeline[i-1].year);
+        
+        if (isChronological) {
             eventItem.classList.add('correct-pos');
             timelineScore++;
         } else {
             eventItem.classList.add('wrong-pos');
         }
+
+        rundownHistory.push({
+            event: userEvent.event,
+            year: userEvent.year,
+            correct: isChronological,
+            desc: userEvent.description
+        });
     });
 
     score = timelineScore;
@@ -435,24 +527,54 @@ function checkTimeline() {
     if (score > highscore) {
         highscore = score;
         sessionStorage.setItem(`beatles_highscore_timeline`, highscore);
-        highscoreEl.textContent = `Highscore: ${highscore}`;
+        highscoreEl.textContent = `High: ${highscore}`;
     }
 
-    submitTimelineBtn.textContent = "Play Again";
-    feedbackEl.innerHTML = `Timeline Results: ${score}/10 correct chronological steps!`;
-    feedbackEl.classList.add('show');
+    submitTimelineBtn.textContent = "Replay";
+    submitTimelineBtn.onclick = () => switchMode('timeline');
+    
+    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/10`;
+    feedbackEl.classList.add('show', 'results');
+
+    // Show detailed rundown
+    const rundownContainer = document.createElement('div');
+    rundownContainer.className = 'rundown-container timeline-rundown';
+    
+    rundownHistory.forEach(item => {
+        const row = document.createElement('div');
+        row.className = `rundown-item ${item.correct ? 'item-correct' : 'item-wrong'}`;
+        row.innerHTML = `
+            <div class="year-circle">${item.year}</div>
+            <div class="song-info">
+                <span class="song-title">${item.event}</span>
+                <span class="song-credits">${item.desc}</span>
+            </div>
+            <div class="result-tag">${item.correct ? 'In Order' : 'Out of Sync'}</div>
+        `;
+        rundownContainer.appendChild(row);
+    });
+
+    timelineContainer.appendChild(rundownContainer);
 }
 
 function getCredits(songName) {
     const title = songName.toLowerCase();
-    const harrisonSongs = ["something", "here comes the sun", "while my guitar gently weeps", "taxman", "within you without you", "if i needed someone", "old brown shoe", "piggies", "savoy truffle", "long, long, long", "i me mine", "for you blue", "think for yourself", "the inner light", "i want to tell you", "love you to", "blue jay way", "don't bother me"];
-    const starkeySongs = ["octopus's garden", "don't pass me by"];
+    const harrisonSongs = ["something", "here comes the sun", "while my guitar gently weeps", "taxman", "within you without you", "if i needed someone", "old brown shoe", "piggies", "savoy truffle", "long, long, long", "i me mine", "for you blue", "think for yourself", "the inner light", "i want to tell you", "love you to", "blue jay way", "don't bother me", "it's all too much", "only a northern song"];
+    const starkeySongs = ["octopus's garden", "don't pass me by", "good night", "yellow submarine"]; // Ringo sang Yellow Submarine, though Paul wrote it, usually attributed for trivia if choice is "who sang/wrote" but here we use main creator. For trivia simplicity, we'll keep Ringo for these.
+    
+    const lennonSongs = [
+        "help!", "ticket to ride", "in my life", "norwegian wood", "strawberry fields forever", "i am the walrus", "all you need is love", "lucy in the sky with diamonds", "a hard day's night", "revolution", "come together", "don't let me down", "julia", "dear prudence", "happiness is a warm gun", "across the universe", "nowhere man", "girl", "i feel fine", "day tripper", "please please me", "you're going to lose that girl", "hide your love away", "run for your life", "rain", "she said she said", "and your bird can sing", "doctor robert", "i'm only sleeping", "tomorrow never knows", "good morning good morning", "mr. kite", "glass onion", "bungalow bill", "sexy sadie", "cry baby cry", "yer blues", "everybody's got something to hide", "sun king", "mean mr. mustard", "polythene pam", "dig a pony", "don't let me down", "i want you", "ballad of john and yoko"
+    ];
+    
+    const mccartneySongs = [
+        "yesterday", "hey jude", "let it be", "eleanor rigby", "penny lane", "blackbird", "here, there and everywhere", "ob-la-di", "get back", "hello, goodbye", "the long and winding road", "paperback writer", "michelle", "i saw her standing there", "can't buy me love", "all my loving", "drive my car", "got to get you into my life", "good day sunshine", "for no one", "fixing a hole", "getting better", "she's leaving home", "when i'm sixty-four", "lovely rita", "back in the u.s.s.r.", "martha my dear", "i will", "mother nature's son", "helter skelter", "honey pie", "lady madonna", "oh! darling", "maxwell's silver hammer", "you never give me your money", "golden slumbers", "carry that weight", "the end", "her majesty", "your mother should know", "fool on the hill", "magical mystery tour"
+    ];
+
     if (harrisonSongs.some(s => title.includes(s))) return "George";
     if (starkeySongs.some(s => title.includes(s))) return "Ringo";
-    const lennonSongs = ["help!", "ticket to ride", "in my life", "norwegian wood", "strawberry fields forever", "i am the walrus", "all you need is love", "lucy in the sky with diamonds", "a hard day's night", "revolution", "come together", "don't let me down", "julia", "dear prudence", "happiness is a warm gun", "across the universe", "nowhere man", "girl", "i feel fine", "day tripper", "ticket to ride", "please please me", "you're going to lose that girl", "hide your love away", "run for your life", "rain", "she said she said", "and your bird can sing", "doctor robert", "i'm only sleeping", "good morning good morning", "mr. kite", "glass onion", "bungalow bill", "sexy sadie", "cry baby cry", "yer blues", "everybody's got something to hide"];
     if (lennonSongs.some(s => title.includes(s))) return "John";
-    const mccartneySongs = ["yesterday", "hey jude", "let it be", "eleanor rigby", "penny lane", "blackbird", "here, there and everywhere", "ob-la-di", "get back", "hello, goodbye", "the long and winding road", "paperback writer", "michelle", "i saw her standing there", "can't buy me love", "all my loving", "drive my car", "got to get you into my life", "good day sunshine", "for no one", "fixing a hole", "getting better", "she's leaving home", "when i'm sixty-four", "lovely rita", "back in the u.s.s.r.", "martha my dear", "i will", "mother nature's son", "helter skelter", "honey pie", "lady madonna", "oh! darling", "maxwell's silver hammer", "you never give me your money", "golden slumbers"];
     if (mccartneySongs.some(s => title.includes(s))) return "Paul";
+    
     return "Lennon-McCartney";
 }
 

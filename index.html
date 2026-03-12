@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/png" href="favicon.png">
     <meta name="description"
         content="Identify the Beatles album from a 4-second song snippet. Test your Fab Four knowledge!">
 </head>
@@ -18,20 +19,19 @@
     <div class="glass-container">
         <header>
             <h1><span class="accent">Beatlemania</span></h1>
-            <div class="score-board">
-                <span id="highscore">Highscore: 0</span>
-                <span id="score">Score: 0</span>
-                <span id="round">Round: 1/10</span>
-            </div>
-        </header>
-
-        <main>
             <div class="mode-selector">
                 <button id="mode-album" class="mode-btn active">Album Sorter</button>
                 <button id="mode-writer" class="mode-btn">Who Wrote It?</button>
                 <button id="mode-timeline" class="mode-btn">Timeline</button>
             </div>
+            <div class="score-board">
+                <span id="highscore">High: 0</span>
+                <span id="score">Score: 0</span>
+                <span id="round">1/10</span>
+            </div>
+        </header>
 
+        <main>
             <div id="game-workspace">
                 <div class="audio-controls" id="audio-controls">
                     <button id="play-btn" class="main-btn">
@@ -59,11 +59,9 @@
                     <div class="timeline-wrapper">
                         <div class="timeline-track">
                             <div class="timeline-labels">
-                                <span>1950</span>
-                                <span>1960</span>
-                                <span>1970</span>
-                                <span>1980</span>
-                                <span>1990</span>
+                                <span>The Beginning</span>
+                                <span>Timeline Flow</span>
+                                <span>The Modern Era</span>
                             </div>
                             <div id="timeline-slots" class="timeline-slots"></div>
                         </div>
