@@ -43,9 +43,9 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    padding-bottom: 1.5rem;
+    align-items: baseline;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
     border-bottom: 1px solid rgba(0,0,0,0.05);
 }
 
@@ -197,14 +197,14 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .main-btn {
     background-color: var(--accent-color);
     border: none;
-    padding: 1rem 2.5rem;
+    padding: 0.8rem 2rem;
     border-radius: 12px;
     color: white;
     font-size: 1.1rem;
@@ -234,12 +234,23 @@ h1 {
     transform: none;
 }
 
-.play-icon {
-    width: 0;
-    height: 0;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    border-left: 15px solid white;
+#play-btn-text {
+    line-height: normal;
+}
+
+.material-symbols-outlined {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#play-btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    line-height: 1;
 }
 
 .visualizer {
@@ -368,13 +379,21 @@ h1 {
 }
 
 .card.correct {
-    background: rgba(0, 255, 136, 0.1);
     border-color: var(--success);
 }
 
+.card.correct img {
+    box-shadow: 0 0 0 4px rgba(22, 163, 74, 0.2), 0 4px 6px -1px rgba(0,0,0,0.1);
+    border: 2px solid var(--success);
+}
+
 .card.wrong {
-    background: rgba(255, 65, 108, 0.1);
     border-color: var(--error);
+}
+
+.card.wrong img {
+    box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.2), 0 4px 6px -1px rgba(0,0,0,0.1);
+    border: 2px solid var(--error);
 }
 
 .album-card img {
@@ -383,6 +402,27 @@ h1 {
     border-radius: 8px;
     object-fit: cover;
     box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.card.album-card {
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.card.album-card:hover {
+    transform: translateY(-4px);
+    box-shadow: none;
+    background: transparent;
+}
+
+.card-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-top: 4px;
 }
 
 .author-card {
