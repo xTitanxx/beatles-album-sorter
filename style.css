@@ -57,8 +57,8 @@ header {
 }
 
 .logo-icon {
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     animation: spin 8s linear infinite;
     filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
 }
@@ -317,17 +317,20 @@ h1 {
 
 .material-symbols-outlined {
     font-family: 'Material Symbols Outlined' !important;
-    font-size: 24px;
-    vertical-align: middle;
-    display: inline-block;
-    line-height: 1;
     font-weight: normal;
     font-style: normal;
-    text-transform: none;
+    font-size: 24px;
+    line-height: 1;
     letter-spacing: normal;
-    word-wrap: normal;
+    text-transform: none;
+    display: inline-block;
     white-space: nowrap;
+    word-wrap: normal;
     direction: ltr;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'liga';
 }
 
 .mode-selector {
@@ -369,9 +372,19 @@ h1 {
 .album-grid {
     grid-template-columns: repeat(6, 1fr);
     width: 100%;
+    max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
     gap: 1rem;
+}
+
+@media (max-width: 1200px) {
+    .album-grid {
+        gap: 0.5rem;
+    }
+    .card {
+        padding: 0.75rem;
+    }
 }
 
 .author-grid {
@@ -397,7 +410,7 @@ h1 {
     gap: 8px;
     width: 100%;
     max-width: 180px;
-    min-height: 220px;
+    min-height: 200px;
     justify-content: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
