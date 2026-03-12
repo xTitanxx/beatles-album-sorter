@@ -14,11 +14,11 @@ const albums = [
 ];
 
 const authors = [
-    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "0%" },
-    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "33.3%" },
-    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "66.6%" },
-    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "100%" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg/1200px-The_Beatles_at_Kennedy_Airport_1964.jpg", bgX: "center" }
+    { name: "John Lennon", id: "John", bgImg: "assets/john.png", bgX: "center" },
+    { name: "Paul McCartney", id: "Paul", bgImg: "assets/paul.png", bgX: "center" },
+    { name: "George Harrison", id: "George", bgImg: "assets/george.png", bgX: "center" },
+    { name: "Ringo Starr", id: "Ringo", bgImg: "assets/ringo.png", bgX: "center" },
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "assets/lennon-mccartney.png", bgX: "center" }
 ];
 
 let currentMode = 'album'; // 'album', 'writer', or 'timeline'
@@ -35,7 +35,7 @@ let gameState = 'waiting';
 let playedSongs = new Set();
 let runHistory = [];
 let timelineEvents = [];
-let userTimeline = Array(10).fill(null);
+let userTimeline = Array(5).fill(null);
 let selectedEventEl = null;
 
 const albumGrid = document.getElementById('album-grid');
@@ -143,7 +143,7 @@ async function fetchNewSong(autoPlay = false) {
         gameState = 'waiting';
         isAnswered = false;
         feedbackEl.classList.remove('show');
-        playBtnText.textContent = "Play";
+        playBtnText.textContent = "Play Snippet";
         playBtn.disabled = true;
 
         playBtn.querySelector('.material-symbols-outlined').textContent = "play_arrow";
@@ -281,7 +281,7 @@ function checkAnswer(selection, card) {
         playBtnText.textContent = "Results";
     } else {
         playBtn.querySelector('.material-symbols-outlined').textContent = "skip_next";
-        playBtnText.textContent = "Next";
+        playBtnText.textContent = "Next Snippet";
     }
     playBtn.disabled = false;
 }
@@ -350,7 +350,7 @@ function initTimeline() {
     timelineContainer.classList.remove('hidden');
     eventPool.innerHTML = '';
     timelineSlots.innerHTML = '';
-    userTimeline = Array(10).fill(null);
+    userTimeline = Array(5).fill(null);
     submitTimelineBtn.classList.add('hidden');
     submitTimelineBtn.textContent = "Check Order";
     submitTimelineBtn.classList.remove('restart-btn');
@@ -362,21 +362,28 @@ function initTimeline() {
         yearMap.get(ev.year).push(ev);
     });
 
-    const uniqueYears = Array.from(yearMap.keys()).sort(() => 0.5 - Math.random()).slice(0, 10);
+    const uniqueYears = Array.from(yearMap.keys()).sort(() => 0.5 - Math.random()).slice(0, 5);
     timelineEvents = uniqueYears.map(year => {
         const eventsForYear = yearMap.get(year);
         return eventsForYear[Math.floor(Math.random() * eventsForYear.length)];
-    });
+    }).sort((a, b) => a.year - b.year); // Keep slots in chronological order
+    
+    // Shuffle events for the pool
+    const poolEvents = [...timelineEvents].sort(() => 0.5 - Math.random());
 
-    timelineEvents.forEach((ev, idx) => {
+    poolEvents.forEach((ev, idx) => {
         const item = document.createElement('div');
         item.className = 'timeline-event';
-        item.textContent = ev.event;
-        item.dataset.idx = idx;
-        item.id = `event-${idx}`;
+        item.innerHTML = `
+            <div class="event-icon">
+                <span class="material-symbols-outlined">${getCategoryIcon(ev.event)}</span>
+            </div>
+            <div class="event-text">${ev.event}</div>
+        `;
+        item.dataset.year = ev.year;
         
         item.addEventListener('click', (e) => {
-            if (gameState === 'answered' || e.target.classList.contains('event-nav')) return;
+            if (gameState === 'answered') return;
             if (selectedEventEl) selectedEventEl.classList.remove('selected');
             selectedEventEl = item;
             item.classList.add('selected');
@@ -385,39 +392,55 @@ function initTimeline() {
         eventPool.appendChild(item);
     });
 
-    for (let i = 0; i < 10; i++) {
+    timelineEvents.forEach((ev, i) => {
+        const slotContainer = document.createElement('div');
+        slotContainer.className = 'slot-container';
+        
         const slot = document.createElement('div');
         slot.className = 'timeline-slot';
-        slot.dataset.slotIdx = i;
+        slot.dataset.targetYear = ev.year;
+        slot.innerHTML = `<span class="slot-placeholder">DROP ${ev.year}</span>`;
+        
+        const yearBox = document.createElement('div');
+        yearBox.className = 'year-pill';
+        yearBox.textContent = ev.year;
+
+        slotContainer.appendChild(slot);
+        slotContainer.appendChild(yearBox);
         
         slot.addEventListener('click', (e) => {
-            if (gameState === 'answered' || e.target.classList.contains('event-nav')) return;
-            if (selectedEventEl && slot.children.length === 0) {
+            if (gameState === 'answered') return;
+            if (selectedEventEl && slot.children.length <= 1) { // 1 if placeholder exists
+                slot.innerHTML = '';
                 slot.appendChild(selectedEventEl);
                 selectedEventEl.classList.remove('selected');
-                const evIdx = parseInt(selectedEventEl.dataset.idx);
-                userTimeline[i] = timelineEvents[evIdx];
-                
-                // Add nav buttons
-                addNavButtons(selectedEventEl, i);
+                userTimeline[i] = timelineEvents.find(te => te.year === parseInt(selectedEventEl.dataset.year));
                 
                 selectedEventEl = null;
                 checkPoolEmpty();
-            } else if (slot.children.length > 0) {
+            } else if (slot.children.length > 0 && !slot.querySelector('.slot-placeholder')) {
                 const item = slot.querySelector('.timeline-event');
                 eventPool.appendChild(item);
-                // Remove nav buttons when back in pool
-                const navs = item.querySelectorAll('.event-nav');
-                navs.forEach(n => n.remove());
+                slot.innerHTML = `<span class="slot-placeholder">DROP ${slot.dataset.targetYear}</span>`;
                 userTimeline[i] = null;
                 if (eventPool.children.length > 0) eventPool.classList.remove('collapsed');
                 checkPoolEmpty();
             }
         });
         
-        timelineSlots.appendChild(slot);
-    }
+        timelineSlots.appendChild(slotContainer);
+    });
 }
+
+function getCategoryIcon(eventText) {
+    if (eventText.includes('released') || eventText.includes('record')) return 'music_note';
+    if (eventText.includes('film') || eventText.includes('Show') || eventText.includes('premiere')) return 'movie';
+    if (eventText.includes('marries') || eventText.includes('born')) return 'favorite';
+    if (eventText.includes('concert') || eventText.includes('gig')) return 'stadium';
+    return 'star';
+}
+
+// Removed old loop structure as it's now handled in initTimeline
 
 function addNavButtons(el, slotIdx) {
     const leftBtn = document.createElement('button');
@@ -434,41 +457,7 @@ function addNavButtons(el, slotIdx) {
     el.appendChild(rightBtn);
 }
 
-function moveEvent(fromIdx, direction) {
-    const toIdx = fromIdx + direction;
-    if (toIdx < 0 || toIdx >= 10 || gameState === 'answered') return;
-    
-    const fromSlot = timelineSlots.children[fromIdx];
-    const toSlot = timelineSlots.children[toIdx];
-    
-    // Swap userTimeline data
-    const temp = userTimeline[fromIdx];
-    userTimeline[fromIdx] = userTimeline[toIdx];
-    userTimeline[toIdx] = temp;
-    
-    // Swap DOM elements
-    const fromEl = fromSlot.querySelector('.timeline-event');
-    const toEl = toSlot.querySelector('.timeline-event');
-    
-    if (fromEl) fromSlot.innerHTML = '';
-    if (toEl) toSlot.innerHTML = '';
-    
-    if (fromEl) {
-        toSlot.appendChild(fromEl);
-        addNavButtons(fromEl, toIdx);
-    }
-    if (toEl) {
-        fromSlot.appendChild(toEl);
-        addNavButtons(toEl, fromIdx);
-    }
-    
-    // Re-attach nav buttons is handled by fresh addNavButtons calls
-    // But we need to clear old ones first
-    if (fromEl) fromEl.querySelectorAll('.event-nav').forEach(n => n.remove());
-    if (toEl) toEl.querySelectorAll('.event-nav').forEach(n => n.remove());
-    if (fromEl) addNavButtons(fromEl, toIdx);
-    if (toEl) addNavButtons(toEl, fromIdx);
-}
+// moveEvent removed as slots are fixed years in the new design
 
 function checkPoolEmpty() {
     if (eventPool.children.length === 0) {
@@ -482,42 +471,31 @@ function checkPoolEmpty() {
 function checkTimeline() {
     gameState = 'answered';
     let timelineScore = 0;
-    const slots = timelineSlots.querySelectorAll('.timeline-slot');
+    const slotContainers = timelineSlots.querySelectorAll('.slot-container');
     
-    // Create a rundown similar to album results
     const rundownHistory = [];
-    
-    // Sort the actual chosen events to know the perfect chronological order for comparison
-    const sortedEvents = [...userTimeline].sort((a, b) => a.year - b.year);
 
-    slots.forEach((slot, i) => {
+    slotContainers.forEach((container, i) => {
+        const slot = container.querySelector('.timeline-slot');
         const eventItem = slot.querySelector('.timeline-event');
+        const targetYear = parseInt(slot.dataset.targetYear);
         const userEvent = userTimeline[i];
         
-        // Remove nav buttons in result view
-        eventItem.querySelectorAll('.event-nav').forEach(n => n.remove());
-
-        const yearTag = document.createElement('div');
-        yearTag.className = 'year-label';
-        yearTag.textContent = userEvent.year;
-        slot.appendChild(yearTag);
-
-        // Logic: Is it in the correct relative position? 
-        // We check if it's strictly greater than the previous one
-        const isChronological = (i === 0 || userEvent.year >= userTimeline[i-1].year);
+        const isCorrect = userEvent && userEvent.year === targetYear;
         
-        if (isChronological) {
-            eventItem.classList.add('correct-pos');
+        if (isCorrect) {
+            eventItem.classList.add('correct-pos'); // matched style to CSS
             timelineScore++;
-        } else {
+        } else if (eventItem) {
             eventItem.classList.add('wrong-pos');
         }
 
         rundownHistory.push({
-            event: userEvent.event,
-            year: userEvent.year,
-            correct: isChronological,
-            desc: userEvent.description
+            event: userEvent ? userEvent.event : "Missing",
+            year: userEvent ? userEvent.year : "N/A",
+            targetYear: targetYear,
+            correct: isCorrect,
+            desc: userEvent ? userEvent.description : "No event placed."
         });
     });
 
@@ -530,13 +508,12 @@ function checkTimeline() {
         highscoreEl.textContent = `High: ${highscore}`;
     }
 
-    submitTimelineBtn.textContent = "Replay";
+    submitTimelineBtn.textContent = "Play Again";
     submitTimelineBtn.onclick = () => switchMode('timeline');
     
-    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/10`;
+    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/5`;
     feedbackEl.classList.add('show', 'results');
 
-    // Show detailed rundown
     const rundownContainer = document.createElement('div');
     rundownContainer.className = 'rundown-container timeline-rundown';
     
@@ -544,12 +521,12 @@ function checkTimeline() {
         const row = document.createElement('div');
         row.className = `rundown-item ${item.correct ? 'item-correct' : 'item-wrong'}`;
         row.innerHTML = `
-            <div class="year-circle">${item.year}</div>
+            <div class="year-circle">${item.targetYear}</div>
             <div class="song-info">
                 <span class="song-title">${item.event}</span>
                 <span class="song-credits">${item.desc}</span>
             </div>
-            <div class="result-tag">${item.correct ? 'In Order' : 'Out of Sync'}</div>
+            <div class="result-tag">${item.correct ? 'Correct' : 'Incorrect'}</div>
         `;
         rundownContainer.appendChild(row);
     });
@@ -600,7 +577,7 @@ function renderAuthors() {
         card.className = 'card author-card';
         card.style.borderRadius = "12px";
         card.innerHTML = `
-            <div class="author-img" style="background-image: url('${author.bgImg}'); background-position-x: ${author.bgX}; border-radius: 8px;"></div>
+            <div class="author-img" style="background-image: url('${author.bgImg}'); background-size: cover; border-radius: 8px;"></div>
             <div class="card-name">${author.name}</div>
         `;
         card.addEventListener('click', () => checkAnswer(author, card));
