@@ -116,10 +116,12 @@ function switchMode(mode) {
     highscoreEl.textContent = `High: ${highscore}`;
 
     if (mode === 'timeline') {
+        document.getElementById('round').classList.add('hidden');
         initTimeline();
     } else {
+        document.getElementById('round').classList.remove('hidden');
         audioControls.classList.remove('hidden');
-        roundAlbums = [...albums].sort(() => Math.random() - 0.5).slice(0, 10);
+        roundAlbums = [...albums].sort(() => Math.random() - 0.5);
         if (mode === 'album') {
             albumGrid.classList.remove('hidden');
         } else {
@@ -143,10 +145,20 @@ async function fetchNewSong(autoPlay = false) {
         gameState = 'waiting';
         isAnswered = false;
         feedbackEl.classList.remove('show');
-        playBtnText.textContent = "Play Snippet";
+        playBtn.innerHTML = `
+            <span id="play-btn-content">
+                <span class="material-symbols-outlined">play_arrow</span>
+                <span id="play-btn-text">Play Snippet</span>
+            </span>
+            <div class="visualizer hidden">
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+                <div class="bar"></div>
+            </div>`;
+        const playBtnText = document.getElementById('play-btn-text');
         playBtn.disabled = true;
-
-        playBtn.querySelector('.material-symbols-outlined').textContent = "play_arrow";
         if (!roundAlbums || roundAlbums.length === 0) {
             roundAlbums = [...albums].sort(() => Math.random() - 0.5).slice(0, 10);
         }
@@ -277,11 +289,17 @@ function checkAnswer(selection, card) {
     scoreEl.textContent = `Score: ${score}`;
 
     if (round === maxRounds) {
-        playBtn.querySelector('.material-symbols-outlined').textContent = "military_tech";
-        playBtnText.textContent = "Results";
+        playBtn.innerHTML = `
+            <span id="play-btn-content">
+                <span class="material-symbols-outlined">military_tech</span>
+                <span id="play-btn-text">Results</span>
+            </span>`;
     } else {
-        playBtn.querySelector('.material-symbols-outlined').textContent = "skip_next";
-        playBtnText.textContent = "Next Snippet";
+        playBtn.innerHTML = `
+            <span id="play-btn-content">
+                <span class="material-symbols-outlined">skip_next</span>
+                <span id="play-btn-text">Next Snippet</span>
+            </span>`;
     }
     playBtn.disabled = false;
 }
@@ -362,11 +380,11 @@ function initTimeline() {
         yearMap.get(ev.year).push(ev);
     });
 
-    const uniqueYears = Array.from(yearMap.keys()).sort(() => 0.5 - Math.random()).slice(0, 5);
+    const uniqueYears = Array.from(yearMap.keys()).sort(() => 0.5 - Math.random()).slice(0, 10);
     timelineEvents = uniqueYears.map(year => {
         const eventsForYear = yearMap.get(year);
         return eventsForYear[Math.floor(Math.random() * eventsForYear.length)];
-    }).sort((a, b) => a.year - b.year); // Keep slots in chronological order
+    }).sort((a, b) => a.year - b.year); 
     
     // Shuffle events for the pool
     const poolEvents = [...timelineEvents].sort(() => 0.5 - Math.random());
@@ -374,12 +392,7 @@ function initTimeline() {
     poolEvents.forEach((ev, idx) => {
         const item = document.createElement('div');
         item.className = 'timeline-event';
-        item.innerHTML = `
-            <div class="event-icon">
-                <span class="material-symbols-outlined">${getCategoryIcon(ev.event)}</span>
-            </div>
-            <div class="event-text">${ev.event}</div>
-        `;
+        item.innerHTML = `<div class="event-text">${ev.event}</div>`;
         item.dataset.year = ev.year;
         
         item.addEventListener('click', (e) => {
@@ -393,6 +406,7 @@ function initTimeline() {
     });
 
     timelineEvents.forEach((ev, i) => {
+        userTimeline[i] = null; // Ensure fresh state
         const slotContainer = document.createElement('div');
         slotContainer.className = 'slot-container';
         
@@ -432,30 +446,7 @@ function initTimeline() {
     });
 }
 
-function getCategoryIcon(eventText) {
-    if (eventText.includes('released') || eventText.includes('record')) return 'music_note';
-    if (eventText.includes('film') || eventText.includes('Show') || eventText.includes('premiere')) return 'movie';
-    if (eventText.includes('marries') || eventText.includes('born')) return 'favorite';
-    if (eventText.includes('concert') || eventText.includes('gig')) return 'stadium';
-    return 'star';
-}
-
-// Removed old loop structure as it's now handled in initTimeline
-
-function addNavButtons(el, slotIdx) {
-    const leftBtn = document.createElement('button');
-    leftBtn.className = 'event-nav nav-left material-symbols-outlined';
-    leftBtn.textContent = 'chevron_left';
-    leftBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, -1); };
-    
-    const rightBtn = document.createElement('button');
-    rightBtn.className = 'event-nav nav-right material-symbols-outlined';
-    rightBtn.textContent = 'chevron_right';
-    rightBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, 1); };
-    
-    el.appendChild(leftBtn);
-    el.appendChild(rightBtn);
-}
+// moveEvent and addNavButtons removed as slots are fixed years in the new design
 
 // moveEvent removed as slots are fixed years in the new design
 
@@ -484,10 +475,10 @@ function checkTimeline() {
         const isCorrect = userEvent && userEvent.year === targetYear;
         
         if (isCorrect) {
-            eventItem.classList.add('correct-pos'); // matched style to CSS
+            eventItem.classList.add('correct_pos'); 
             timelineScore++;
         } else if (eventItem) {
-            eventItem.classList.add('wrong-pos');
+            eventItem.classList.add('wrong_pos');
         }
 
         rundownHistory.push({
@@ -508,10 +499,12 @@ function checkTimeline() {
         highscoreEl.textContent = `High: ${highscore}`;
     }
 
-    submitTimelineBtn.innerHTML = '<span class="material-symbols-outlined">replay</span> <span>Play Again</span>';
+    submitTimelineBtn.innerHTML = `
+        <span class="material-symbols-outlined">replay</span>
+        <span>Play Again</span>`;
     submitTimelineBtn.onclick = () => switchMode('timeline');
     
-    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/5`;
+    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/10`;
     feedbackEl.classList.add('show', 'results');
 
     const rundownContainer = document.createElement('div');
