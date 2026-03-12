@@ -373,6 +373,7 @@ function switchMode(mode) {
     score = 0;
     isAnswered = false;
     runHistory = [];
+    selectedEventEl = null;
 
     // Reset UI
     albumGrid.classList.add('hidden');
@@ -387,7 +388,8 @@ function switchMode(mode) {
 
     roundEl.textContent = `Round: ${round}/${maxRounds}`;
     scoreEl.textContent = `Score: ${score}`;
-    highscore = parseInt(sessionStorage.getItem(`beatles_highscore_${mode}`)) || 0;
+    const highscoreKey = mode === 'timeline' ? `beatles_highscore_timeline` : `beatles_highscore_${mode}`;
+    highscore = parseInt(sessionStorage.getItem(highscoreKey)) || 0;
     highscoreEl.textContent = `Highscore: ${highscore}`;
 
     if (mode === 'timeline') {
@@ -411,22 +413,36 @@ function initTimeline() {
     timelineSlots.innerHTML = '';
     userTimeline = Array(10).fill(null);
     submitTimelineBtn.classList.add('hidden');
+    submitTimelineBtn.textContent = "Finish & Check Order";
+    submitTimelineBtn.onclick = null; // Reset click handler if previously set for "Play Again"
+    selectedEventEl = null;
 
-    // Pick 10 random events
-    const shuffled = [...beatlesEvents].sort(() => 0.5 - Math.random());
-    timelineEvents = shuffled.slice(0, 10);
+    // Pick 10 events with unique years
+    const yearMap = new Map();
+    beatlesEvents.forEach(ev => {
+        if (!yearMap.has(ev.year)) yearMap.set(ev.year, []);
+        yearMap.get(ev.year).push(ev);
+    });
+
+    const uniqueYears = Array.from(yearMap.keys()).sort(() => 0.5 - Math.random()).slice(0, 10);
+    timelineEvents = uniqueYears.map(year => {
+        const eventsForYear = yearMap.get(year);
+        return eventsForYear[Math.floor(Math.random() * eventsForYear.length)];
+    });
 
     // Create Pool
     timelineEvents.forEach((ev, idx) => {
         const item = document.createElement('div');
         item.className = 'timeline-event';
-        item.draggable = true;
         item.textContent = ev.event;
         item.dataset.idx = idx;
         item.id = `event-${idx}`;
         
-        item.addEventListener('dragstart', (e) => {
-            e.dataTransfer.setData('text/plain', e.target.id);
+        item.addEventListener('click', () => {
+            if (gameState === 'answered') return;
+            if (selectedEventEl) selectedEventEl.classList.remove('selected');
+            selectedEventEl = item;
+            item.classList.add('selected');
         });
         
         eventPool.appendChild(item);
@@ -438,24 +454,18 @@ function initTimeline() {
         slot.className = 'timeline-slot';
         slot.dataset.slotIdx = i;
         
-        slot.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            slot.classList.add('drag-over');
-        });
-        
-        slot.addEventListener('dragleave', () => {
-            slot.classList.remove('drag-over');
-        });
-        
-        slot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            slot.classList.remove('drag-over');
-            const id = e.dataTransfer.getData('text/plain');
-            const draggedEl = document.getElementById(id);
-            
-            if (slot.children.length === 0) {
-                slot.appendChild(draggedEl);
-                userTimeline[i] = timelineEvents[parseInt(draggedEl.dataset.idx)];
+        slot.addEventListener('click', () => {
+            if (gameState === 'answered') return;
+            if (selectedEventEl && slot.children.length === 0) {
+                slot.appendChild(selectedEventEl);
+                selectedEventEl.classList.remove('selected');
+                userTimeline[i] = timelineEvents[parseInt(selectedEventEl.dataset.idx)];
+                selectedEventEl = null;
+                checkPoolEmpty();
+            } else if (slot.children.length > 0) {
+                const item = slot.firstChild;
+                eventPool.appendChild(item);
+                userTimeline[i] = null;
                 checkPoolEmpty();
             }
         });
@@ -471,25 +481,22 @@ function checkPoolEmpty() {
 }
 
 function checkTimeline() {
+    gameState = 'answered';
     let timelineScore = 0;
     const slots = timelineSlots.querySelectorAll('.timeline-slot');
-    
-    // Sort actual events by year for reference
-    const sortedEvents = [...timelineEvents].sort((a, b) => a.year - b.year);
     
     slots.forEach((slot, i) => {
         const eventItem = slot.querySelector('.timeline-event');
         const userEvent = userTimeline[i];
         
-        // Logical check: Is this event in the correct relative position?
-        // Actually, let's just show the year and mark if they are in increasing order.
         const yearTag = document.createElement('div');
         yearTag.className = 'year-label';
         yearTag.textContent = userEvent.year;
         slot.appendChild(yearTag);
 
         // Simple scoring: Is current event year >= previous event year?
-        if (i === 0 || userEvent.year >= userTimeline[i-1].year) {
+        // Since we ensure unique years, we can just check if they are in increasing order.
+        if (i === 0 || userEvent.year > userTimeline[i-1].year) {
             eventItem.classList.add('correct-pos');
             timelineScore++;
         } else {
@@ -507,7 +514,6 @@ function checkTimeline() {
     }
 
     submitTimelineBtn.textContent = "Play Again";
-    submitTimelineBtn.onclick = () => switchMode('timeline');
     
     feedbackEl.innerHTML = `Timeline Results: ${score}/10 correct chronological steps!`;
     feedbackEl.classList.add('show');
