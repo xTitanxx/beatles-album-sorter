@@ -557,16 +557,17 @@ h1 {
 
 .timeline-slot .year-label {
     position: absolute;
-    top: -1.8rem;
+    top: -2.2rem; /* Moved up slightly */
     left: 50%;
     transform: translateX(-50%);
     font-size: 1rem;
     font-weight: 700;
-    color: var(--accent-color);
-    background: white;
-    padding: 2px 6px;
+    color: white;
+    background: var(--accent-color); /* More contrast */
+    padding: 2px 8px;
     border-radius: 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    z-index: 2;
 }
 
 .timeline-slot .timeline-event {
