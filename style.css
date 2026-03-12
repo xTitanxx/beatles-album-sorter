@@ -291,7 +291,10 @@ h1 {
 }
 
 .album-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(6, 1fr);
+    max-width: 1050px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .author-grid {
@@ -338,7 +341,7 @@ h1 {
 .album-card img {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
+    border-radius: 8px;
     object-fit: cover;
     border: 1px solid var(--glass-border);
 }
@@ -352,7 +355,7 @@ h1 {
 .author-img {
     width: 120px;
     height: 120px;
-    border-radius: 50%;
+    border-radius: 8px;
     border: 1px solid var(--glass-border);
     transition: all 0.2s ease;
     background-size: 530% auto;
