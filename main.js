@@ -242,16 +242,21 @@ async function fetchNewSong(autoPlay = false) {
 }
 
 function playSnippet() {
+    const btnContent = document.getElementById('play-btn-content');
     if (audio.paused && gameState !== 'answered') {
         gameState = 'playing';
         audio.currentTime = 0;
         audio.play();
         visualizer.classList.add('visualizing');
+        visualizer.classList.remove('hidden');
+        btnContent.classList.add('hidden');
         playBtn.disabled = true;
 
         audioTimeout = setTimeout(() => {
             audio.pause();
             visualizer.classList.remove('visualizing');
+            visualizer.classList.add('hidden');
+            btnContent.classList.remove('hidden');
             playBtn.disabled = false;
             if (gameState === 'playing') gameState = 'waiting';
         }, 4000);
@@ -266,6 +271,8 @@ function checkAnswer(selection, card) {
     clearTimeout(audioTimeout);
     audio.pause();
     visualizer.classList.remove('visualizing');
+    visualizer.classList.add('hidden');
+    document.getElementById('play-btn-content').classList.remove('hidden');
 
     let isCorrect = false;
     let correctAnswerStr = "";
@@ -330,63 +337,180 @@ function checkAnswer(selection, card) {
     playBtn.disabled = false;
 }
 
-function nextRound(autoPlay = false) {
-    if (round < maxRounds) {
-        round++;
-        roundEl.textContent = `Round: ${round}/${maxRounds}`;
-        document.querySelectorAll('.card').forEach(c => {
-            c.classList.remove('correct', 'wrong');
-        });
-        fetchNewSong(autoPlay);
+let timelineEvents = [];
+let userTimeline = Array(10).fill(null);
+
+const timelineContainer = document.getElementById('timeline-container');
+const eventPool = document.getElementById('event-pool');
+const timelineSlots = document.getElementById('timeline-slots');
+const submitTimelineBtn = document.getElementById('submit-timeline');
+const audioControls = document.getElementById('audio-controls');
+
+function init() {
+    // Mode buttons
+    document.getElementById('mode-album').addEventListener('click', () => switchMode('album'));
+    document.getElementById('mode-writer').addEventListener('click', () => switchMode('writer'));
+    document.getElementById('mode-timeline').addEventListener('click', () => switchMode('timeline'));
+
+    playBtn.addEventListener('click', () => {
+        if (gameState === 'waiting') {
+            playSnippet();
+        } else if (gameState === 'answered') {
+            nextRound(true);
+        }
+    });
+
+    submitTimelineBtn.addEventListener('click', checkTimeline);
+
+    loadHighscores();
+    switchMode('album');
+}
+
+function switchMode(mode) {
+    currentMode = mode;
+    gameState = 'waiting';
+    round = 1;
+    score = 0;
+    isAnswered = false;
+    runHistory = [];
+
+    // Reset UI
+    albumGrid.classList.add('hidden');
+    authorGrid.classList.add('hidden');
+    timelineContainer.classList.add('hidden');
+    audioControls.classList.add('hidden');
+    feedbackEl.classList.remove('show', 'results');
+    feedbackEl.textContent = '';
+    
+    document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById(`mode-${mode}`).classList.add('active');
+
+    roundEl.textContent = `Round: ${round}/${maxRounds}`;
+    scoreEl.textContent = `Score: ${score}`;
+    highscore = parseInt(sessionStorage.getItem(`beatles_highscore_${mode}`)) || 0;
+    highscoreEl.textContent = `Highscore: ${highscore}`;
+
+    if (mode === 'timeline') {
+        initTimeline();
     } else {
-        showFinalResults();
+        audioControls.classList.remove('hidden');
+        if (mode === 'album') {
+            albumGrid.classList.remove('hidden');
+            renderAlbums();
+        } else {
+            authorGrid.classList.remove('hidden');
+            renderAuthors();
+        }
+        fetchNewSong(false);
     }
 }
 
-function showFinalResults() {
+function initTimeline() {
+    timelineContainer.classList.remove('hidden');
+    eventPool.innerHTML = '';
+    timelineSlots.innerHTML = '';
+    userTimeline = Array(10).fill(null);
+    submitTimelineBtn.classList.add('hidden');
+
+    // Pick 10 random events
+    const shuffled = [...beatlesEvents].sort(() => 0.5 - Math.random());
+    timelineEvents = shuffled.slice(0, 10);
+
+    // Create Pool
+    timelineEvents.forEach((ev, idx) => {
+        const item = document.createElement('div');
+        item.className = 'timeline-event';
+        item.draggable = true;
+        item.textContent = ev.event;
+        item.dataset.idx = idx;
+        item.id = `event-${idx}`;
+        
+        item.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('text/plain', e.target.id);
+        });
+        
+        eventPool.appendChild(item);
+    });
+
+    // Create Slots (1950 - 1990)
+    for (let i = 0; i < 10; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'timeline-slot';
+        slot.dataset.slotIdx = i;
+        
+        slot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            slot.classList.add('drag-over');
+        });
+        
+        slot.addEventListener('dragleave', () => {
+            slot.classList.remove('drag-over');
+        });
+        
+        slot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            const id = e.dataTransfer.getData('text/plain');
+            const draggedEl = document.getElementById(id);
+            
+            if (slot.children.length === 0) {
+                slot.appendChild(draggedEl);
+                userTimeline[i] = timelineEvents[parseInt(draggedEl.dataset.idx)];
+                checkPoolEmpty();
+            }
+        });
+        
+        timelineSlots.appendChild(slot);
+    }
+}
+
+function checkPoolEmpty() {
+    if (eventPool.children.length === 0) {
+        submitTimelineBtn.classList.remove('hidden');
+    }
+}
+
+function checkTimeline() {
+    let timelineScore = 0;
+    const slots = timelineSlots.querySelectorAll('.timeline-slot');
+    
+    // Sort actual events by year for reference
+    const sortedEvents = [...timelineEvents].sort((a, b) => a.year - b.year);
+    
+    slots.forEach((slot, i) => {
+        const eventItem = slot.querySelector('.timeline-event');
+        const userEvent = userTimeline[i];
+        
+        // Logical check: Is this event in the correct relative position?
+        // Actually, let's just show the year and mark if they are in increasing order.
+        const yearTag = document.createElement('div');
+        yearTag.className = 'year-label';
+        yearTag.textContent = userEvent.year;
+        slot.appendChild(yearTag);
+
+        // Simple scoring: Is current event year >= previous event year?
+        if (i === 0 || userEvent.year >= userTimeline[i-1].year) {
+            eventItem.classList.add('correct-pos');
+            timelineScore++;
+        } else {
+            eventItem.classList.add('wrong-pos');
+        }
+    });
+
+    score = timelineScore;
+    scoreEl.textContent = `Score: ${score}`;
+    
     if (score > highscore) {
         highscore = score;
-        sessionStorage.setItem(`beatles_highscore_${currentMode}`, highscore);
+        sessionStorage.setItem(`beatles_highscore_timeline`, highscore);
         highscoreEl.textContent = `Highscore: ${highscore}`;
     }
 
-    albumGrid.classList.add('hidden');
-    authorGrid.classList.add('hidden');
-    document.querySelector('.mode-selector').classList.add('hidden');
-    playBtn.classList.add('hidden');
-    visualizer.classList.add('hidden'); // Hide visualizer dots
-    feedbackEl.innerHTML = `Game Over!<br>Final Score: ${score}/${maxRounds}`;
-    feedbackEl.classList.add('results');
-    feedbackEl.style.color = score >= 8 ? "var(--success)" : "var(--text-primary)";
-
-    const rundownContainer = document.createElement('div');
-    rundownContainer.className = 'rundown-container';
-
-    runHistory.forEach(item => {
-        const row = document.createElement('div');
-        row.className = `rundown-item ${item.correct ? 'item-correct' : 'item-wrong'}`;
-        row.innerHTML = `
-            <img src="${item.img}" alt="${item.album}">
-            <div class="song-info">
-                <span class="song-title">${item.title}</span>
-                <span class="song-credits">${item.credits}</span>
-            </div>
-            <div class="album-info">
-                ${item.album} (${item.year})
-            </div>
-            <div class="result-tag">${item.correct ? 'Correct' : 'Wrong'}</div>
-        `;
-        rundownContainer.appendChild(row);
-    });
-
-    document.querySelector('main').appendChild(rundownContainer);
-
-    const restartBtn = document.createElement('button');
-    restartBtn.className = 'main-btn';
-    restartBtn.innerHTML = '<div class="play-icon"></div><span>Play Again</span>';
-    restartBtn.style.margin = "2rem auto";
-    restartBtn.onclick = () => window.location.reload();
-    document.querySelector('main').appendChild(restartBtn);
+    submitTimelineBtn.textContent = "Play Again";
+    submitTimelineBtn.onclick = () => switchMode('timeline');
+    
+    feedbackEl.innerHTML = `Timeline Results: ${score}/10 correct chronological steps!`;
+    feedbackEl.classList.add('show');
 }
 
 init();

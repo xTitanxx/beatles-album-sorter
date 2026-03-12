@@ -16,7 +16,7 @@
 <body>
     <div class="glass-container">
         <header>
-            <h1>The <span class="accent">Beatles</span></h1>
+            <h1><span class="accent">Beatlemania</span></h1>
             <div class="score-board">
                 <span id="highscore">Highscore: 0</span>
                 <span id="score">Score: 0</span>
@@ -28,33 +28,56 @@
             <div class="mode-selector">
                 <button id="mode-album" class="mode-btn active">Album Sorter</button>
                 <button id="mode-writer" class="mode-btn">Who Wrote It?</button>
+                <button id="mode-timeline" class="mode-btn">Timeline</button>
             </div>
 
-            <div class="audio-controls">
-                <div class="visualizer">
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
-                    <div class="bar"></div>
+            <div id="game-workspace">
+                <div class="audio-controls" id="audio-controls">
+                    <button id="play-btn" class="main-btn">
+                        <span id="play-btn-content">
+                            <div class="play-icon"></div>
+                            <span id="play-btn-text">Play Snippet</span>
+                        </span>
+                        <div class="visualizer hidden">
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                            <div class="bar"></div>
+                        </div>
+                    </button>
                 </div>
-                <button id="play-btn" class="main-btn">
-                    <div class="play-icon"></div>
-                    <span id="play-btn-text">Play Snippet (4s)</span>
-                </button>
+
+                <div id="feedback" class="feedback"></div>
+
+                <div id="album-grid" class="grid-container album-grid"></div>
+                <div id="author-grid" class="grid-container author-grid hidden"></div>
+                
+                <div id="timeline-container" class="timeline-container hidden">
+                    <div id="event-pool" class="event-pool"></div>
+                    <div class="timeline-wrapper">
+                        <div class="timeline-track">
+                            <div class="timeline-labels">
+                                <span>1950</span>
+                                <span>1960</span>
+                                <span>1970</span>
+                                <span>1980</span>
+                                <span>1990</span>
+                            </div>
+                            <div id="timeline-slots" class="timeline-slots"></div>
+                        </div>
+                    </div>
+                    <button id="submit-timeline" class="main-btn hidden">Check Order</button>
+                </div>
             </div>
-
-            <div id="feedback" class="feedback"></div>
-
-            <div id="album-grid" class="grid-container album-grid"></div>
-            <div id="author-grid" class="grid-container author-grid hidden"></div>
         </main>
 
         <footer>
-            <!-- Next button merged into play-btn -->
+            <!-- Interactive elements injected via JS -->
         </footer>
     </div>
 
+    <script src="events.js"></script>
     <script src="main.js"></script>
 </body>
 
