@@ -147,7 +147,7 @@ async function fetchNewSong(autoPlay = false) {
         feedbackEl.classList.remove('show');
         playBtn.innerHTML = `
             <span id="play-btn-content">
-                <span class="material-symbols-outlined">play_arrow</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                 <span id="play-btn-text">Play Snippet</span>
             </span>
             <div class="visualizer hidden">
@@ -291,13 +291,13 @@ function checkAnswer(selection, card) {
     if (round === maxRounds) {
         playBtn.innerHTML = `
             <span id="play-btn-content">
-                <span class="material-symbols-outlined">military_tech</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 5h-2V3H7v2H5c-1.1 0-2 .9-2 2v1c0 2.55 1.92 4.63 4.39 4.94.63 1.5 1.98 2.63 3.61 2.96V19H7v2h10v-2h-4v-3.1c1.63-.33 2.98-1.46 3.61-2.96C19.08 12.63 21 10.55 21 8V7c0-1.1-.9-2-2-2zM5 8V7h2v3.82C5.94 10.47 5 9.35 5 8zm14 0c0 1.35-.94 2.47-2 2.82V7h2v1z"/></svg>
                 <span id="play-btn-text">Results</span>
             </span>`;
     } else {
         playBtn.innerHTML = `
             <span id="play-btn-content">
-                <span class="material-symbols-outlined">skip_next</span>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
                 <span id="play-btn-text">Next Snippet</span>
             </span>`;
     }
@@ -358,7 +358,7 @@ function showFinalResults() {
     const restartBtn = document.createElement('button');
     restartBtn.className = 'main-btn restart-btn';
     restartBtn.style.display = "flex";
-    restartBtn.innerHTML = '<span class="material-symbols-outlined">replay</span><span>Replay</span>';
+    restartBtn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg><span>Replay</span>';
     restartBtn.style.margin = "2rem auto";
     restartBtn.onclick = () => switchMode(currentMode);
     document.querySelector('main').appendChild(restartBtn);
@@ -593,7 +593,7 @@ function checkTimeline() {
     }
 
     submitTimelineBtn.innerHTML = `
-        <span class="material-symbols-outlined">replay</span>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 8px;"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></svg>
         <span>Play Again</span>`;
     submitTimelineBtn.onclick = () => switchMode('timeline');
     
