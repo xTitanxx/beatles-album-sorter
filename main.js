@@ -352,7 +352,7 @@ function initTimeline() {
     timelineSlots.innerHTML = '';
     userTimeline = Array(5).fill(null);
     submitTimelineBtn.classList.add('hidden');
-    submitTimelineBtn.textContent = "Check Order";
+    submitTimelineBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> <span>Submit Timeline</span>';
     submitTimelineBtn.classList.remove('restart-btn');
     selectedEventEl = null;
 
@@ -508,7 +508,7 @@ function checkTimeline() {
         highscoreEl.textContent = `High: ${highscore}`;
     }
 
-    submitTimelineBtn.textContent = "Play Again";
+    submitTimelineBtn.innerHTML = '<span class="material-symbols-outlined">replay</span> <span>Play Again</span>';
     submitTimelineBtn.onclick = () => switchMode('timeline');
     
     feedbackEl.innerHTML = `Timeline Accuracy: ${score}/5`;
