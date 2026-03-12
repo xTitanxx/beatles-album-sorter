@@ -51,7 +51,7 @@ const feedbackEl = document.getElementById('feedback');
 const scoreEl = document.getElementById('score');
 const highscoreEl = document.getElementById('highscore');
 const roundEl = document.getElementById('round');
-const visualizer = document.querySelector('.visualizer');
+const getViz = () => playBtn.querySelector('.visualizer');
 
 function init() {
     renderAlbums();
@@ -90,8 +90,8 @@ function switchMode(mode) {
     playedSongs.clear();
     audio.pause();
     clearTimeout(audioTimeout);
-    visualizer.classList.add('hidden');
-    visualizer.classList.remove('visualizing');
+    const viz = getViz();
+    if (viz) { viz.classList.add('hidden'); viz.classList.remove('visualizing'); }
     document.getElementById('play-btn-content').classList.remove('hidden');
 
     // Reset UI
@@ -213,8 +213,8 @@ function playSnippet() {
         gameState = 'playing';
         audio.currentTime = 0;
         audio.play();
-        visualizer.classList.add('visualizing');
-        visualizer.classList.remove('hidden');
+        const viz = getViz();
+        if (viz) { viz.classList.add('visualizing'); viz.classList.remove('hidden'); }
         btnContent.classList.add('hidden');
         playBtn.disabled = true;
 
@@ -227,8 +227,8 @@ function playSnippet() {
 function stopAudioSnippet() {
     clearTimeout(audioTimeout);
     audio.pause();
-    visualizer.classList.remove('visualizing');
-    visualizer.classList.add('hidden');
+    const viz = getViz();
+    if (viz) { viz.classList.remove('visualizing'); viz.classList.add('hidden'); }
     document.getElementById('play-btn-content').classList.remove('hidden');
     playBtn.disabled = false;
     if (gameState === 'playing') gameState = 'waiting';
@@ -328,7 +328,8 @@ function showFinalResults() {
     albumGrid.classList.add('hidden');
     authorGrid.classList.add('hidden');
     playBtn.classList.add('hidden');
-    visualizer.classList.add('hidden');
+    const viz = getViz();
+    if (viz) viz.classList.add('hidden');
     feedbackEl.innerHTML = `Final Score: ${score}/${maxRounds}`;
     feedbackEl.classList.add('results', 'show');
     feedbackEl.style.color = score >= 8 ? "var(--accent-color)" : "var(--text-primary)";
@@ -376,8 +377,10 @@ function initTimeline() {
 
     userTimeline = Array(10).fill(null);
     submitTimelineBtn.classList.add('hidden');
-    submitTimelineBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> <span>Submit Timeline</span>';
     submitTimelineBtn.classList.remove('restart-btn');
+    submitTimelineBtn.onclick = null;
+    submitTimelineBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg><span>Submit Timeline</span>';
+    eventPool.classList.remove('collapsed');
     selectedEventEl = null;
 
     const yearMap = new Map();
@@ -462,10 +465,21 @@ function initTimeline() {
         
         slot.addEventListener('click', (e) => {
             if (gameState === 'answered') return;
-            if (selectedEventEl && !slot.querySelector('.timeline-event')) {
+            const placed = slot.querySelector('.timeline-event');
+            if (selectedEventEl && !placed) {
+                // Empty slot — place selected event
                 placeEvent(selectedEventEl);
                 selectedEventEl = null;
-            } else if (slot.querySelector('.timeline-event')) {
+            } else if (selectedEventEl && placed) {
+                // Full slot — swap: return current to pool, place selected
+                placed.querySelectorAll('.event-nav').forEach(n => n.remove());
+                eventPool.appendChild(placed);
+                eventPool.classList.remove('collapsed');
+                userTimeline[i] = null;
+                placeEvent(selectedEventEl);
+                selectedEventEl = null;
+            } else if (placed && !selectedEventEl) {
+                // No selection — remove and return to pool
                 removeEvent();
             }
         });
@@ -498,13 +512,13 @@ function addNavButtons(el, slotIdx) {
     el.querySelectorAll('.event-nav').forEach(n => n.remove());
     
     const leftBtn = document.createElement('button');
-    leftBtn.className = 'event-nav nav-left material-symbols-outlined';
-    leftBtn.textContent = 'chevron_left';
+    leftBtn.className = 'event-nav nav-left';
+    leftBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>';
     leftBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, -1); };
     
     const rightBtn = document.createElement('button');
-    rightBtn.className = 'event-nav nav-right material-symbols-outlined';
-    rightBtn.textContent = 'chevron_right';
+    rightBtn.className = 'event-nav nav-right';
+    rightBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>';
     rightBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, 1); };
     
     el.appendChild(leftBtn);
