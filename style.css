@@ -316,10 +316,18 @@ h1 {
 }
 
 .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
     font-size: 24px;
     vertical-align: middle;
     display: inline-block;
     line-height: 1;
+    font-weight: normal;
+    font-style: normal;
+    text-transform: none;
+    letter-spacing: normal;
+    word-wrap: normal;
+    white-space: nowrap;
+    direction: ltr;
 }
 
 .mode-selector {
@@ -360,35 +368,36 @@ h1 {
 
 .album-grid {
     grid-template-columns: repeat(6, 1fr);
-    max-width: 1200px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .author-grid {
     grid-template-columns: repeat(5, 1fr);
     justify-content: center;
-    max-width: 1100px;
+    width: 100%;
     margin-left: auto;
     margin-right: auto;
-    gap: 1.5rem;
+    gap: 1rem;
 }
 
 .card {
     background: white;
     border: 1px solid transparent;
-    border-radius: 20px;
-    padding: 1.5rem;
+    border-radius: 16px;
+    padding: 1rem;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
-    width: 220px;
-    min-height: 280px;
+    gap: 8px;
+    width: 100%;
+    max-width: 180px;
+    min-height: 220px;
     justify-content: center;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
