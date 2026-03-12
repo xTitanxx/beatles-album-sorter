@@ -43,10 +43,29 @@ body {
 header {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 1.5rem;
-    padding-bottom: 1rem;
+    align-items: center;
+    padding: 1.5rem 2rem;
+    background: white;
     border-bottom: 1px solid rgba(0,0,0,0.05);
+    gap: 2rem;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo-icon {
+    width: 42px;
+    height: 42px;
+    animation: spin 8s linear infinite;
+    filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
 }
 
 h1 {
@@ -555,9 +574,51 @@ h1 {
     box-shadow: 0 12px 24px rgba(0,0,0,0.1);
 }
 
-.timeline-event.selected {
+.timeline-event.selected, 
+.timeline-event.dragging {
     border-color: var(--accent-color);
     box-shadow: 0 0 0 4px rgba(236, 91, 19, 0.1);
+    opacity: 0.6;
+    cursor: grabbing;
+}
+
+.timeline-slot.drag-over {
+    border-color: var(--accent-color);
+    background: rgba(236, 91, 19, 0.05);
+    transform: scale(1.02);
+}
+
+.timeline-event .event-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--accent-color);
+    color: white;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    z-index: 10;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+}
+
+.timeline-event:hover .event-nav {
+    opacity: 1;
+}
+
+.event-nav.nav-left { left: -12px; }
+.event-nav.nav-right { right: -12px; }
+
+.event-nav:hover {
+    background: var(--accent-secondary);
+    transform: translateY(-50%) scale(1.2);
 }
 
 .event-icon {

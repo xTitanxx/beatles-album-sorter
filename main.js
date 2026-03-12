@@ -35,7 +35,7 @@ let gameState = 'waiting';
 let playedSongs = new Set();
 let runHistory = [];
 let timelineEvents = [];
-let userTimeline = Array(5).fill(null);
+let userTimeline = Array(10).fill(null);
 let selectedEventEl = null;
 
 const albumGrid = document.getElementById('album-grid');
@@ -365,10 +365,16 @@ function showFinalResults() {
 }
 
 function initTimeline() {
+    gameState = 'waiting';
     timelineContainer.classList.remove('hidden');
     eventPool.innerHTML = '';
     timelineSlots.innerHTML = '';
-    userTimeline = Array(5).fill(null);
+    feedbackEl.classList.remove('show', 'results');
+    feedbackEl.innerHTML = '';
+    const oldRundown = timelineContainer.querySelector('.rundown-container');
+    if (oldRundown) oldRundown.remove();
+
+    userTimeline = Array(10).fill(null);
     submitTimelineBtn.classList.add('hidden');
     submitTimelineBtn.innerHTML = '<span class="material-symbols-outlined">check_circle</span> <span>Submit Timeline</span>';
     submitTimelineBtn.classList.remove('restart-btn');
@@ -386,12 +392,12 @@ function initTimeline() {
         return eventsForYear[Math.floor(Math.random() * eventsForYear.length)];
     }).sort((a, b) => a.year - b.year); 
     
-    // Shuffle events for the pool
     const poolEvents = [...timelineEvents].sort(() => 0.5 - Math.random());
 
     poolEvents.forEach((ev, idx) => {
         const item = document.createElement('div');
         item.className = 'timeline-event';
+        item.draggable = true;
         item.innerHTML = `<div class="event-text">${ev.event}</div>`;
         item.dataset.year = ev.year;
         
@@ -401,17 +407,28 @@ function initTimeline() {
             selectedEventEl = item;
             item.classList.add('selected');
         });
+
+        item.addEventListener('dragstart', (e) => {
+            if (gameState === 'answered') return;
+            selectedEventEl = item;
+            item.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', ev.year);
+        });
+
+        item.addEventListener('dragend', () => {
+            item.classList.remove('dragging');
+        });
         
         eventPool.appendChild(item);
     });
 
     timelineEvents.forEach((ev, i) => {
-        userTimeline[i] = null; // Ensure fresh state
         const slotContainer = document.createElement('div');
         slotContainer.className = 'slot-container';
         
         const slot = document.createElement('div');
         slot.className = 'timeline-slot';
+        slot.dataset.slotIdx = i;
         slot.dataset.targetYear = ev.year;
         slot.innerHTML = `<span class="slot-placeholder">DROP ${ev.year}</span>`;
         
@@ -421,24 +438,55 @@ function initTimeline() {
 
         slotContainer.appendChild(slot);
         slotContainer.appendChild(yearBox);
-        
-        slot.addEventListener('click', (e) => {
-            if (gameState === 'answered') return;
-            if (selectedEventEl && slot.children.length <= 1) { // 1 if placeholder exists
-                slot.innerHTML = '';
-                slot.appendChild(selectedEventEl);
-                selectedEventEl.classList.remove('selected');
-                userTimeline[i] = timelineEvents.find(te => te.year === parseInt(selectedEventEl.dataset.year));
-                
-                selectedEventEl = null;
-                checkPoolEmpty();
-            } else if (slot.children.length > 0 && !slot.querySelector('.slot-placeholder')) {
-                const item = slot.querySelector('.timeline-event');
+
+        const placeEvent = (el) => {
+            slot.innerHTML = '';
+            slot.appendChild(el);
+            el.classList.remove('selected', 'dragging');
+            userTimeline[i] = timelineEvents.find(te => te.year === parseInt(el.dataset.year));
+            addNavButtons(el, i);
+            checkPoolEmpty();
+        };
+
+        const removeEvent = () => {
+            const item = slot.querySelector('.timeline-event');
+            if (item) {
+                item.querySelectorAll('.event-nav').forEach(n => n.remove());
                 eventPool.appendChild(item);
                 slot.innerHTML = `<span class="slot-placeholder">DROP ${slot.dataset.targetYear}</span>`;
                 userTimeline[i] = null;
-                if (eventPool.children.length > 0) eventPool.classList.remove('collapsed');
+                eventPool.classList.remove('collapsed');
                 checkPoolEmpty();
+            }
+        };
+        
+        slot.addEventListener('click', (e) => {
+            if (gameState === 'answered') return;
+            if (selectedEventEl && !slot.querySelector('.timeline-event')) {
+                placeEvent(selectedEventEl);
+                selectedEventEl = null;
+            } else if (slot.querySelector('.timeline-event')) {
+                removeEvent();
+            }
+        });
+
+        slot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            if (gameState === 'answered') return;
+            slot.classList.add('drag-over');
+        });
+
+        slot.addEventListener('dragleave', () => {
+            slot.classList.remove('drag-over');
+        });
+
+        slot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            slot.classList.remove('drag-over');
+            if (gameState === 'answered') return;
+            if (selectedEventEl && !slot.querySelector('.timeline-event')) {
+                placeEvent(selectedEventEl);
+                selectedEventEl = null;
             }
         });
         
@@ -446,9 +494,54 @@ function initTimeline() {
     });
 }
 
-// moveEvent and addNavButtons removed as slots are fixed years in the new design
+function addNavButtons(el, slotIdx) {
+    el.querySelectorAll('.event-nav').forEach(n => n.remove());
+    
+    const leftBtn = document.createElement('button');
+    leftBtn.className = 'event-nav nav-left material-symbols-outlined';
+    leftBtn.textContent = 'chevron_left';
+    leftBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, -1); };
+    
+    const rightBtn = document.createElement('button');
+    rightBtn.className = 'event-nav nav-right material-symbols-outlined';
+    rightBtn.textContent = 'chevron_right';
+    rightBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, 1); };
+    
+    el.appendChild(leftBtn);
+    el.appendChild(rightBtn);
+}
 
-// moveEvent removed as slots are fixed years in the new design
+function moveEvent(fromIdx, direction) {
+    const toIdx = fromIdx + direction;
+    if (toIdx < 0 || toIdx >= 10 || gameState === 'answered') return;
+
+    const fromSlot = timelineSlots.children[fromIdx].querySelector('.timeline-slot');
+    const toSlot = timelineSlots.children[toIdx].querySelector('.timeline-slot');
+
+    const fromEl = fromSlot.querySelector('.timeline-event');
+    const toEl = toSlot.querySelector('.timeline-event');
+
+    // Swap userTimeline data
+    [userTimeline[fromIdx], userTimeline[toIdx]] = [userTimeline[toIdx], userTimeline[fromIdx]];
+
+    // Clear slots
+    fromSlot.innerHTML = '';
+    toSlot.innerHTML = '';
+
+    if (fromEl) {
+        toSlot.appendChild(fromEl);
+        addNavButtons(fromEl, toIdx);
+    } else {
+        toSlot.innerHTML = `<span class="slot-placeholder">DROP ${toSlot.dataset.targetYear}</span>`;
+    }
+
+    if (toEl) {
+        fromSlot.appendChild(toEl);
+        addNavButtons(toEl, fromIdx);
+    } else {
+        fromSlot.innerHTML = `<span class="slot-placeholder">DROP ${fromSlot.dataset.targetYear}</span>`;
+    }
+}
 
 function checkPoolEmpty() {
     if (eventPool.children.length === 0) {
@@ -475,10 +568,10 @@ function checkTimeline() {
         const isCorrect = userEvent && userEvent.year === targetYear;
         
         if (isCorrect) {
-            eventItem.classList.add('correct_pos'); 
+            eventItem.classList.add('correct-pos'); 
             timelineScore++;
         } else if (eventItem) {
-            eventItem.classList.add('wrong_pos');
+            eventItem.classList.add('wrong-pos');
         }
 
         rundownHistory.push({
