@@ -266,7 +266,7 @@ function checkAnswer(selection, card) {
         card.classList.add('wrong');
         const correctText = currentMode === 'album' 
             ? `Wrong! That was ${currentSong.trackName} from ${currentSong.correctAlbum.name}`
-            : `Wrong! That was written by ${currentSong.credits}`;
+            : `Wrong! "${currentSong.trackName}" was written by ${currentSong.credits}`;
         feedbackEl.textContent = correctText;
         feedbackEl.style.color = "var(--error)";
 
@@ -497,11 +497,17 @@ function initTimeline() {
         slot.addEventListener('drop', (e) => {
             e.preventDefault();
             slot.classList.remove('drag-over');
-            if (gameState === 'answered') return;
-            if (selectedEventEl && !slot.querySelector('.timeline-event')) {
-                placeEvent(selectedEventEl);
-                selectedEventEl = null;
+            if (gameState === 'answered' || !selectedEventEl) return;
+            const placed = slot.querySelector('.timeline-event');
+            if (placed) {
+                // Swap: return current to pool, place dragged
+                placed.querySelectorAll('.event-nav').forEach(n => n.remove());
+                eventPool.appendChild(placed);
+                eventPool.classList.remove('collapsed');
+                userTimeline[i] = null;
             }
+            placeEvent(selectedEventEl);
+            selectedEventEl = null;
         });
         
         timelineSlots.appendChild(slotContainer);
