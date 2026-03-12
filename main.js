@@ -127,7 +127,7 @@ function switchMode(mode) {
         } else {
             authorGrid.classList.remove('hidden');
         }
-        roundEl.textContent = `${round}/${maxRounds}`;
+        roundEl.textContent = `Round ${round}/${maxRounds}`;
         fetchNewSong(false);
     }
 }
@@ -307,7 +307,7 @@ function checkAnswer(selection, card) {
 function nextRound(autoPlay = false) {
     if (round < maxRounds) {
         round++;
-        roundEl.textContent = `${round}/${maxRounds}`;
+        roundEl.textContent = `Round ${round}/${maxRounds}`;
         document.querySelectorAll('.card').forEach(c => {
             c.classList.remove('correct', 'wrong');
         });
