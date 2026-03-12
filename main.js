@@ -18,7 +18,7 @@ const authors = [
     { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "33.3%" },
     { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "66.6%" },
     { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "100%" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "https://upload.wikimedia.org/wikipedia/commons/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg", bgX: "center" }
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg/1200px-The_Beatles_at_Kennedy_Airport_1964.jpg", bgX: "center" }
 ];
 
 let currentMode = 'album'; // 'album', 'writer', or 'timeline'
@@ -136,10 +136,14 @@ async function fetchNewSong(autoPlay = false) {
         gameState = 'waiting';
         isAnswered = false;
         feedbackEl.classList.remove('show');
-        playBtnText.textContent = "Play Snippet (4s)";
+        playBtnText.textContent = "Play Snippet";
         playBtn.disabled = true;
 
-        const targetAlbum = roundAlbums[round - 1];
+        playBtn.querySelector('.material-symbols-outlined').textContent = "play_arrow";
+        if (!roundAlbums || roundAlbums.length === 0) {
+            roundAlbums = [...albums].sort(() => Math.random() - 0.5).slice(0, 10);
+        }
+        const targetAlbum = roundAlbums[Math.min(round - 1, roundAlbums.length - 1)];
         if (!targetAlbum) return;
 
         const query = encodeURIComponent(`the beatles ${targetAlbum.exactName}`);
@@ -265,8 +269,10 @@ function checkAnswer(selection, card) {
     scoreEl.textContent = `Score: ${score}`;
 
     if (round === maxRounds) {
+        playBtn.querySelector('.material-symbols-outlined').textContent = "military_tech";
         playBtnText.textContent = "See Final Results";
     } else {
+        playBtn.querySelector('.material-symbols-outlined').textContent = "skip_next";
         playBtnText.textContent = "Play Next Song";
     }
     playBtn.disabled = false;
@@ -299,7 +305,7 @@ function showFinalResults() {
     visualizer.classList.add('hidden');
     feedbackEl.innerHTML = `Game Over!<br>Final Score: ${score}/${maxRounds}`;
     feedbackEl.classList.add('results', 'show');
-    feedbackEl.style.color = score >= 8 ? "var(--success)" : "var(--text-primary)";
+    feedbackEl.style.color = score >= 8 ? "var(--accent-color)" : "var(--text-primary)";
 
     const rundownContainer = document.createElement('div');
     rundownContainer.className = 'rundown-container';
@@ -325,8 +331,8 @@ function showFinalResults() {
 
     const restartBtn = document.createElement('button');
     restartBtn.className = 'main-btn';
-    restartBtn.style.display = "block";
-    restartBtn.innerHTML = '<div class="play-icon"></div><span>Play Again</span>';
+    restartBtn.style.display = "flex";
+    restartBtn.innerHTML = '<span class="material-symbols-outlined">replay</span><span>Play Again</span>';
     restartBtn.style.margin = "2rem auto";
     restartBtn.onclick = () => switchMode(currentMode);
     document.querySelector('main').appendChild(restartBtn);
