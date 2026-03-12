@@ -14,11 +14,11 @@ const albums = [
 ];
 
 const authors = [
-    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "0%" },
-    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "33.33%" },
-    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "66.66%" },
-    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "100%" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/The_Beatles_in_America.JPG/600px-The_Beatles_in_America.JPG" }
+    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "-3%" },
+    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "32.5%" },
+    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "68%" },
+    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "104%" },
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg" }
 ];
 
 let currentMode = 'album'; // 'album' or 'writer'
