@@ -14,11 +14,11 @@ const albums = [
 ];
 
 const authors = [
-    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "-3%" },
-    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "32.5%" },
-    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "68%" },
-    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "104%" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", img: "https://upload.wikimedia.org/wikipedia/commons/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg" }
+    { name: "John Lennon", id: "John", bgImg: "let_it_be.png", bgX: "0%" },
+    { name: "Paul McCartney", id: "Paul", bgImg: "let_it_be.png", bgX: "33.3%" },
+    { name: "George Harrison", id: "George", bgImg: "let_it_be.png", bgX: "66.6%" },
+    { name: "Ringo Starr", id: "Ringo", bgImg: "let_it_be.png", bgX: "100%" },
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "https://upload.wikimedia.org/wikipedia/commons/d/df/The_Beatles_at_Kennedy_Airport_1964.jpg", bgX: "center" }
 ];
 
 let currentMode = 'album'; // 'album' or 'writer'
@@ -162,10 +162,7 @@ function renderAuthors() {
         const card = document.createElement('div');
         card.className = 'card author-card';
         card.innerHTML = `
-            ${author.bgImg ? 
-                `<div class="author-img" style="background-image: url('${author.bgImg}'); background-position-x: ${author.bgX};"></div>` : 
-                `<img src="${author.img}" alt="${author.name}" class="author-img">`
-            }
+            <div class="author-img" style="background-image: url('${author.bgImg}'); background-position-x: ${author.bgX};"></div>
             <div class="card-name">${author.name}</div>
         `;
         card.addEventListener('click', () => checkAnswer(author, card));

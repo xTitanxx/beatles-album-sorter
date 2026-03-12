@@ -318,6 +318,9 @@ h1 {
     flex-direction: column;
     align-items: center;
     gap: 12px;
+    width: 150px; /* Fixed width */
+    min-height: 200px; /* Fixed min-height to match text-wrapped albums */
+    justify-content: flex-start;
 }
 
 .card:hover {
