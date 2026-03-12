@@ -682,7 +682,7 @@ function getCredits(songName) {
         "no reply", "i'll be back",
         "it won't be long", "tell me why", "every little thing",
         "if i fell", "i don't want to spoil the party",
-        "the word", "what goes on"
+        "the word", "what goes on", "do you want to know a secret"
     ];
 
     // Primarily Paul McCartney songs (NOT 50/50 cowrites)
@@ -718,13 +718,14 @@ function getCredits(songName) {
     // Cover songs (not written by The Beatles)
     const coverSongs = [
         "twist and shout", "anna (go to him)", "chains", "boys",
-        "a taste of honey", "baby it's you", "do you want to know a secret",
+        "a taste of honey", "baby it's you",
         "roll over beethoven", "you really got a hold on me",
-        "please mr. postman", "devil in her heart", "money",
+        "please mr. postman", "please mister postman", "devil in her heart", "money",
         "till there was you", "long tall sally", "slow down",
         "matchbox", "kansas city", "mr. moonlight", "rock and roll music",
         "words of love", "everybody's trying to be my baby",
-        "honey don't", "dizzy miss lizzy", "bad boy", "act naturally"
+        "honey don't", "dizzy miss lizzy", "bad boy", "act naturally",
+        "words of love", "honey don't"
     ];
 
     // Songs written by all four Beatles
