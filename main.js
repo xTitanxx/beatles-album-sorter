@@ -18,7 +18,9 @@ const authors = [
     { name: "Paul McCartney", id: "Paul", bgImg: "assets/paul.png", bgX: "center" },
     { name: "George Harrison", id: "George", bgImg: "assets/george.png", bgX: "center" },
     { name: "Ringo Starr", id: "Ringo", bgImg: "assets/ringo.png", bgX: "center" },
-    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "assets/lennon-mccartney.png", bgX: "center" }
+    { name: "Lennon-McCartney", id: "Lennon-McCartney", bgImg: "assets/lennon-mccartney.png", bgX: "center" },
+    { name: "All Four", id: "All4", bgImg: "assets/all4.png", bgX: "center" },
+    { name: "Cover", id: "Cover", bgImg: "assets/cover.png", bgX: "center" }
 ];
 
 let currentMode = 'album'; // 'album', 'writer', or 'timeline'
@@ -642,24 +644,105 @@ function checkTimeline() {
 
 function getCredits(songName) {
     const title = songName.toLowerCase();
-    const harrisonSongs = ["something", "here comes the sun", "while my guitar gently weeps", "taxman", "within you without you", "if i needed someone", "old brown shoe", "piggies", "savoy truffle", "long, long, long", "i me mine", "for you blue", "think for yourself", "the inner light", "i want to tell you", "love you to", "blue jay way", "don't bother me", "it's all too much", "only a northern song"];
-    const starkeySongs = ["octopus's garden", "don't pass me by", "good night", "yellow submarine"]; // Ringo sang Yellow Submarine, though Paul wrote it, usually attributed for trivia if choice is "who sang/wrote" but here we use main creator. For trivia simplicity, we'll keep Ringo for these.
-    
-    const lennonSongs = [
-        "help!", "ticket to ride", "in my life", "norwegian wood", "strawberry fields forever", "i am the walrus", "all you need is love", "lucy in the sky with diamonds", "a hard day's night", "revolution", "come together", "don't let me down", "julia", "dear prudence", "happiness is a warm gun", "across the universe", "nowhere man", "girl", "i feel fine", "day tripper", "please please me", "you're going to lose that girl", "hide your love away", "run for your life", "rain", "she said she said", "and your bird can sing", "doctor robert", "i'm only sleeping", "tomorrow never knows", "good morning good morning", "mr. kite", "glass onion", "bungalow bill", "sexy sadie", "cry baby cry", "yer blues", "everybody's got something to hide", "sun king", "mean mr. mustard", "polythene pam", "dig a pony", "don't let me down", "i want you", "ballad of john and yoko"
-    ];
-    
-    const mccartneySongs = [
-        "yesterday", "hey jude", "let it be", "eleanor rigby", "penny lane", "blackbird", "here, there and everywhere", "ob-la-di", "get back", "hello, goodbye", "the long and winding road", "paperback writer", "michelle", "i saw her standing there", "can't buy me love", "all my loving", "drive my car", "got to get you into my life", "good day sunshine", "for no one", "fixing a hole", "getting better", "she's leaving home", "when i'm sixty-four", "lovely rita", "back in the u.s.s.r.", "martha my dear", "i will", "mother nature's son", "helter skelter", "honey pie", "lady madonna", "oh! darling", "maxwell's silver hammer", "you never give me your money", "golden slumbers", "carry that weight", "the end", "her majesty", "your mother should know", "fool on the hill", "magical mystery tour"
+
+    // George Harrison songs
+    const harrisonSongs = [
+        "something", "here comes the sun", "while my guitar gently weeps",
+        "taxman", "within you without you", "if i needed someone",
+        "old brown shoe", "piggies", "savoy truffle", "long, long, long",
+        "i me mine", "for you blue", "think for yourself", "the inner light",
+        "i want to tell you", "love you to", "blue jay way", "don't bother me",
+        "it's all too much", "only a northern song", "not guilty"
     ];
 
+    // Ringo Starr songs
+    const starkeySongs = [
+        "octopus's garden", "don't pass me by"
+    ];
+
+    // Primarily John Lennon songs (NOT 50/50 cowrites)
+    const lennonSongs = [
+        "help!", "ticket to ride", "in my life", "norwegian wood",
+        "strawberry fields forever", "i am the walrus", "all you need is love",
+        "lucy in the sky with diamonds", "a hard day's night", "revolution",
+        "come together", "don't let me down", "julia", "dear prudence",
+        "happiness is a warm gun", "across the universe", "nowhere man",
+        "girl", "i feel fine", "day tripper", "please please me",
+        "you're going to lose that girl", "hide your love away",
+        "run for your life", "rain", "she said she said",
+        "and your bird can sing", "doctor robert", "i'm only sleeping",
+        "tomorrow never knows", "good morning good morning",
+        "mr. kite", "glass onion", "bungalow bill", "sexy sadie",
+        "cry baby cry", "yer blues", "everybody's got something to hide",
+        "sun king", "mean mr. mustard", "polythene pam", "dig a pony",
+        "i want you", "ballad of john and yoko",
+        "i'm a loser", "you've got to hide your love away",
+        "i should have known better", "any time at all",
+        "i call your name", "not a second time", "you can't do that",
+        "no reply", "i'll be back",
+        "it won't be long", "tell me why", "every little thing",
+        "if i fell", "i don't want to spoil the party",
+        "the word", "what goes on"
+    ];
+
+    // Primarily Paul McCartney songs (NOT 50/50 cowrites)
+    const mccartneySongs = [
+        "yesterday", "hey jude", "let it be", "eleanor rigby",
+        "penny lane", "blackbird", "here, there and everywhere",
+        "ob-la-di", "get back", "hello, goodbye",
+        "the long and winding road", "paperback writer", "michelle",
+        "i saw her standing there", "can't buy me love", "all my loving",
+        "drive my car", "got to get you into my life",
+        "good day sunshine", "for no one", "fixing a hole",
+        "getting better", "she's leaving home", "when i'm sixty-four",
+        "lovely rita", "back in the u.s.s.r.", "martha my dear",
+        "i will", "mother nature's son", "helter skelter",
+        "honey pie", "lady madonna", "oh! darling",
+        "maxwell's silver hammer", "you never give me your money",
+        "golden slumbers", "carry that weight", "the end",
+        "her majesty", "your mother should know", "fool on the hill",
+        "magical mystery tour", "and i love her",
+        "things we said today", "another day",
+        "every night", "maybe i'm amazed", "live and let die",
+        "we can work it out", "yellow submarine", "good night",
+        "rocky raccoon", "why don't we do it in the road"
+    ];
+
+    // 50/50 Lennon-McCartney cowrites — these will fall through to default
+    // Misery, Little Child, Baby's in Black, Eight Days a Week,
+    // With a Little Help From My Friends, A Day in the Life,
+    // Baby You're a Rich Man, Birthday, I've Got a Feeling,
+    // From Me to You, Thank You Girl, She Loves You,
+    // I Want to Hold Your Hand, I'll Get You
+
+    // Cover songs (not written by The Beatles)
+    const coverSongs = [
+        "twist and shout", "anna (go to him)", "chains", "boys",
+        "a taste of honey", "baby it's you", "do you want to know a secret",
+        "roll over beethoven", "you really got a hold on me",
+        "please mr. postman", "devil in her heart", "money",
+        "till there was you", "long tall sally", "slow down",
+        "matchbox", "kansas city", "mr. moonlight", "rock and roll music",
+        "words of love", "everybody's trying to be my baby",
+        "honey don't", "dizzy miss lizzy", "bad boy", "act naturally"
+    ];
+
+    // Songs written by all four Beatles
+    const allFourSongs = [
+        "flying", "dig it"
+    ];
+
+    if (coverSongs.some(s => title.includes(s))) return "Cover";
+    if (allFourSongs.some(s => title.includes(s))) return "All4";
     if (harrisonSongs.some(s => title.includes(s))) return "George";
     if (starkeySongs.some(s => title.includes(s))) return "Ringo";
     if (lennonSongs.some(s => title.includes(s))) return "John";
     if (mccartneySongs.some(s => title.includes(s))) return "Paul";
-    
+
+    // Default: true cowrites and uncategorized Lennon-McCartney songs
     return "Lennon-McCartney";
 }
+
 
 function renderAlbums() {
     albumGrid.innerHTML = '';
