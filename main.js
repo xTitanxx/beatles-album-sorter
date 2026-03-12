@@ -453,17 +453,7 @@ function initTimeline() {
             checkPoolEmpty();
         };
 
-        const removeEvent = () => {
-            const item = slot.querySelector('.timeline-event');
-            if (item) {
-                item.querySelectorAll('.event-nav').forEach(n => n.remove());
-                eventPool.appendChild(item);
-                slot.innerHTML = `<span class="slot-placeholder">DROP ${slot.dataset.targetYear}</span>`;
-                userTimeline[i] = null;
-                eventPool.classList.remove('collapsed');
-                checkPoolEmpty();
-            }
-        };
+        const removeEvent = () => removeTimelineEvent(i);
         
         slot.addEventListener('click', (e) => {
             if (gameState === 'answered') return;
@@ -528,9 +518,30 @@ function addNavButtons(el, slotIdx) {
     rightBtn.className = 'event-nav nav-right';
     rightBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/></svg>';
     rightBtn.onclick = (e) => { e.stopPropagation(); moveEvent(slotIdx, 1); };
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'event-nav nav-remove';
+    removeBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+    removeBtn.onclick = (e) => { e.stopPropagation(); removeTimelineEvent(slotIdx); };
     
     el.appendChild(leftBtn);
     el.appendChild(rightBtn);
+    el.appendChild(removeBtn);
+}
+
+function removeTimelineEvent(idx) {
+    const slotContainer = timelineSlots.children[idx];
+    if (!slotContainer) return;
+    const slot = slotContainer.querySelector('.timeline-slot');
+    const item = slot.querySelector('.timeline-event');
+    if (item) {
+        item.querySelectorAll('.event-nav').forEach(n => n.remove());
+        eventPool.appendChild(item);
+        slot.innerHTML = `<span class="slot-placeholder">DROP ${slot.dataset.targetYear}</span>`;
+        userTimeline[idx] = null;
+        eventPool.classList.remove('collapsed');
+        checkPoolEmpty();
+    }
 }
 
 function moveEvent(fromIdx, direction) {

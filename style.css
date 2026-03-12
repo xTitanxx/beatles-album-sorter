@@ -641,10 +641,21 @@ h1 {
 
 .event-nav.nav-left { left: -12px; }
 .event-nav.nav-right { right: -12px; }
+.event-nav.nav-remove { 
+    top: -10px; 
+    right: -10px; 
+    transform: scale(0.9); 
+    background: #ea4335; 
+}
 
 .event-nav:hover {
     background: var(--accent-secondary);
     transform: translateY(-50%) scale(1.2);
+}
+
+.event-nav.nav-remove:hover {
+    background: #d32f2f;
+    transform: scale(1.1);
 }
 
 .event-icon {
@@ -746,8 +757,9 @@ h1 {
     box-shadow: 0 4px 8px rgba(236, 91, 19, 0.2);
 }
 
+/* Buttons are hidden by default, shown on hover (desktop) */
 .timeline-event .event-nav {
-    display: none !important;
+    opacity: 0;
 }
 
 .timeline-event.correct-pos {
@@ -778,7 +790,8 @@ h1 {
 
 @media (max-width: 600px) {
     header { flex-direction: column; text-align: center; gap: 1rem; }
-    .mode-selector { order: 2; width: 100%; overflow-x: auto; }
+    .mode-selector { order: 2; width: auto; max-width: 100%; margin: 0 auto; }
+    .mode-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
     .score-board { order: 3; width: 100%; justify-content: center; margin-top: 1rem; }
     
     .album-grid, .author-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
@@ -788,4 +801,14 @@ h1 {
     .timeline-slot { width: 140px; height: 180px; }
     .timeline-event { width: 130px; height: 160px; padding: 0.8rem; }
     .event-icon .material-symbols-outlined { font-size: 24px; }
+}
+/* Mobile Overrides for Timeline Buttons */
+@media (max-width: 600px) {
+    .timeline-event .event-nav { display: none !important; }
+    .timeline-event .event-nav.nav-remove { 
+        display: flex !important; 
+        opacity: 1; 
+        top: -5px !important; 
+        right: -5px !important; 
+    }
 }
