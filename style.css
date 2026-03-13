@@ -798,17 +798,22 @@ h1 {
     .mode-btn { padding: 0.5rem 0.8rem; font-size: 0.8rem; }
     .score-board { order: 3; width: 100%; justify-content: center; margin-top: 1rem; }
     
-    .album-grid, .author-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    .card { width: 160px; min-height: 220px; padding: 1rem; border-radius: 16px; }
+    .album-grid, .author-grid { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; }
+    .card { width: 100%; min-height: 120px; padding: 0.5rem; border-radius: 12px; }
+    .card-name { font-size: 0.65rem; }
     
-    .year-pill { padding: 0.4rem 1rem; font-size: 0.9rem; }
-    .timeline-slots { gap: 0.2rem; }
-    .slot-container { gap: 1rem; }
-    .timeline-slot { height: 120px; min-width: 60px; }
-    .timeline-event { min-height: 110px; padding: 0.5rem; }
+    .event-pool { grid-template-columns: repeat(4, 1fr); gap: 0.5rem; padding: 1rem; min-height: 150px; }
     
-    .event-icon .material-symbols-outlined { font-size: 20px; }
-    .event-text { font-size: 0.75rem; }
+    .year-pill { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+    .timeline-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.5rem; justify-content: center; }
+    .slot-container { gap: 0.5rem; width: 100%; }
+    
+    .timeline-slot { width: 100%; height: auto; aspect-ratio: 3/4; min-width: 0; padding: 2px; border-width: 2px; border-radius: 8px; }
+    .slot-placeholder { font-size: 0.5rem; padding: 0; text-align: center; }
+    
+    .timeline-event { width: 100%; height: 100%; min-height: 0; padding: 4px; border-radius: 6px; }
+    .event-icon .material-symbols-outlined { font-size: 16px; }
+    .event-text { font-size: 0.6rem; line-height: 1.2; text-align: center; word-break: break-word; }
 }
 
 /* Mobile Overrides for Timeline Buttons */
