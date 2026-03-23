@@ -247,7 +247,8 @@ function checkAnswer(selection, card) {
     if (currentMode === 'album') {
         isCorrect = selection.name === currentSong.correctAlbum.name;
     } else {
-        isCorrect = selection.id === currentSong.credits;
+        const creditId = currentSong.credits.split(':')[0];
+        isCorrect = selection.id === creditId;
     }
 
     runHistory.push({
@@ -262,13 +263,28 @@ function checkAnswer(selection, card) {
     if (isCorrect) {
         score++;
         card.classList.add('correct');
-        feedbackEl.textContent = `Correct! That was ${currentSong.trackName}`;
+        const creditPart = currentSong.credits.split(':').pop();
+        const isCover = currentSong.credits.startsWith("Cover");
+        if (isCover) {
+            feedbackEl.textContent = `Correct! That was "${currentSong.trackName}", a cover of ${creditPart}.`;
+        } else {
+            feedbackEl.textContent = `Correct! That was "${currentSong.trackName}".`;
+        }
         feedbackEl.style.color = "var(--success)";
     } else {
         card.classList.add('wrong');
-        const correctText = currentMode === 'album' 
-            ? `Wrong! That was ${currentSong.trackName} from ${currentSong.correctAlbum.name}`
-            : `Wrong! "${currentSong.trackName}" was written by ${currentSong.credits}`;
+        let correctText = "";
+        if (currentMode === 'album') {
+            correctText = `Wrong! That was "${currentSong.trackName}" from ${currentSong.correctAlbum.name}.`;
+        } else {
+            const isCover = currentSong.credits.startsWith("Cover");
+            const creditPart = currentSong.credits.split(':').pop();
+            if (isCover) {
+                correctText = `Incorrect. "${currentSong.trackName}" is a cover song, originally by ${creditPart}.`;
+            } else {
+                correctText = `Wrong! "${currentSong.trackName}" was written by ${creditPart}.`;
+            }
+        }
         feedbackEl.textContent = correctText;
         feedbackEl.style.color = "var(--error)";
 
@@ -279,8 +295,9 @@ function checkAnswer(selection, card) {
             if (currentMode === 'album' && nameEl === currentSong.correctAlbum.name) {
                 c.classList.add('correct');
             } else if (currentMode === 'writer') {
-                const targetAuthor = authors.find(a => a.id === currentSong.credits);
-                if (targetAuthor && nameEl === targetAuthor.name) {
+                const targetAuthorId = currentSong.credits.split(':')[0];
+                const authorData = authors.find(a => a.id === targetAuthorId);
+                if (authorData && nameEl === authorData.name) {
                     c.classList.add('correct');
                 }
             }
@@ -351,7 +368,7 @@ function showFinalResults() {
             <img src="${item.img}" alt="${item.album}" style="border-radius: 8px;">
             <div class="song-info">
                 <span class="song-title">${item.title}</span>
-                <span class="song-credits">${item.credits}</span>
+                <span class="song-credits">${item.credits.startsWith("Cover:") ? `Originally by ${item.credits.split(':').pop()}` : item.credits}</span>
             </div>
             <div class="album-info">
                 ${item.album} (${item.year})
@@ -753,24 +770,43 @@ function getCredits(songName) {
     // I Want to Hold Your Hand, I'll Get You
 
     // Cover songs (not written by The Beatles)
-    const coverSongs = [
-        "twist and shout", "anna (go to him)", "chains", "boys",
-        "a taste of honey", "baby it's you",
-        "roll over beethoven", "you really got a hold on me",
-        "please mr. postman", "please mister postman", "devil in her heart", "money",
-        "till there was you", "long tall sally", "slow down",
-        "matchbox", "kansas city", "mr. moonlight", "rock and roll music",
-        "words of love", "everybody's trying to be my baby",
-        "honey don't", "dizzy miss lizzy", "bad boy", "act naturally",
-        "words of love", "honey don't"
-    ];
+    const COVER_WRITERS = {
+        "twist and shout": "the Isley Brothers",
+        "anna (go to him)": "Arthur Alexander",
+        "chains": "the Cookies",
+        "boys": "the Shirelles",
+        "a taste of honey": "Bobby Scott",
+        "baby it's you": "the Shirelles",
+        "roll over beethoven": "Chuck Berry",
+        "you really got a hold on me": "the Miracles",
+        "please mr. postman": "the Marvelettes",
+        "please mister postman": "the Marvelettes",
+        "devil in her heart": "the Donays",
+        "money": "Barrett Strong",
+        "till there was you": "Meredith Willson",
+        "long tall sally": "Little Richard",
+        "slow down": "Larry Williams",
+        "matchbox": "Carl Perkins",
+        "kansas city": "Little Richard",
+        "mr. moonlight": "Dr. Feelgood & the Interns",
+        "rock and roll music": "Chuck Berry",
+        "words of love": "Buddy Holly",
+        "everybody's trying to be my baby": "Carl Perkins",
+        "honey don't": "Carl Perkins",
+        "dizzy miss lizzy": "Larry Williams",
+        "bad boy": "Larry Williams",
+        "act naturally": "Buck Owens"
+    };
+
+    const coverSongs = Object.keys(COVER_WRITERS);
 
     // Songs written by all four Beatles
     const allFourSongs = [
         "flying", "dig it"
     ];
 
-    if (coverSongs.some(s => title.includes(s))) return "Cover";
+    const matchedCover = coverSongs.find(s => title.includes(s));
+    if (matchedCover) return `Cover:${COVER_WRITERS[matchedCover]}`;
     if (allFourSongs.some(s => title.includes(s))) return "All4";
     if (harrisonSongs.some(s => title.includes(s))) return "George";
     if (starkeySongs.some(s => title.includes(s))) return "Ringo";
