@@ -201,9 +201,83 @@ h1 {
     box-shadow: 0 4px 10px rgba(220, 38, 38, 0.2);
 }
 
+.year-circle.wrong {
+    background: var(--error) !important;
+}
+
 .item-correct .year-circle {
     background: var(--success);
     box-shadow: 0 4px 10px rgba(22, 163, 74, 0.2);
+}
+
+/* Results Scorecard */
+.final-score-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--surface);
+    border: 2px solid var(--accent-color);
+    border-radius: 20px;
+    padding: 1.5rem 3rem;
+    margin: 1rem auto 2rem;
+    box-shadow: 0 10px 25px rgba(236, 91, 19, 0.15);
+    animation: slideUp 0.5s ease-out;
+}
+
+.final-score-label {
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.final-score-value {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+/* Timeline Comparison */
+.comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.user-answer, .correct-answer {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.user-answer .label, .correct-answer .label {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.user-answer .label { color: var(--error); }
+.correct-answer .label { color: var(--success); }
+
+.user-answer .song-title {
+    color: var(--error);
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.correct-answer .song-title {
+    color: var(--success);
+    font-weight: 700;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 .score-board {

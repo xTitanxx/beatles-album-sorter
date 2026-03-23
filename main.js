@@ -332,7 +332,12 @@ function showFinalResults() {
     playBtn.classList.add('hidden');
     const viz = getViz();
     if (viz) viz.classList.add('hidden');
-    feedbackEl.innerHTML = `Final Score: ${score}/${maxRounds}`;
+    feedbackEl.innerHTML = `
+        <div class="final-score-container">
+            <div class="final-score-label">Final Score</div>
+            <div class="final-score-value">${score}/${maxRounds}</div>
+        </div>
+    `;
     feedbackEl.classList.add('results', 'show');
     feedbackEl.style.color = score >= 8 ? "var(--accent-color)" : "var(--text-primary)";
 
@@ -612,7 +617,9 @@ function checkTimeline() {
             year: userEvent ? userEvent.year : "N/A",
             targetYear: targetYear,
             correct: isCorrect,
-            desc: userEvent ? userEvent.description : "No event placed."
+            desc: userEvent ? userEvent.description : "No event placed.",
+            correctEvent: timelineEvents[i].event,
+            correctDesc: timelineEvents[i].description
         });
     });
 
@@ -630,7 +637,12 @@ function checkTimeline() {
         <span>Play Again</span>`;
     submitTimelineBtn.onclick = () => switchMode('timeline');
     
-    feedbackEl.innerHTML = `Timeline Accuracy: ${score}/10`;
+    feedbackEl.innerHTML = `
+        <div class="final-score-container">
+            <div class="final-score-label">Timeline Accuracy</div>
+            <div class="final-score-value">${score}/10</div>
+        </div>
+    `;
     feedbackEl.classList.add('show', 'results');
 
     const rundownContainer = document.createElement('div');
@@ -640,10 +652,24 @@ function checkTimeline() {
         const row = document.createElement('div');
         row.className = `rundown-item ${item.correct ? 'item-correct' : 'item-wrong'}`;
         row.innerHTML = `
-            <div class="year-circle">${item.targetYear}</div>
+            <div class="year-circle ${item.correct ? '' : 'wrong'}">${item.targetYear}</div>
             <div class="song-info">
-                <span class="song-title">${item.event}</span>
-                <span class="song-credits">${item.desc}</span>
+                ${item.correct ? `
+                    <span class="song-title">${item.event}</span>
+                    <span class="song-credits">${item.desc}</span>
+                ` : `
+                    <div class="comparison">
+                        <div class="user-answer">
+                            <span class="label">Your Answer:</span>
+                            <span class="song-title">${item.event}</span>
+                        </div>
+                        <div class="correct-answer">
+                            <span class="label">Correct Answer:</span>
+                            <span class="song-title">${item.correctEvent}</span>
+                            <span class="song-credits">${item.correctDesc}</span>
+                        </div>
+                    </div>
+                `}
             </div>
             <div class="result-tag">${item.correct ? 'Correct' : 'Incorrect'}</div>
         `;
